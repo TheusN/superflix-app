@@ -1,12 +1,15 @@
 FROM nginx:alpine
 
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy app files
-COPY --chmod=644 index.html /usr/share/nginx/html/
-COPY --chmod=644 css/ /usr/share/nginx/html/css/
-COPY --chmod=644 js/ /usr/share/nginx/html/js/
+COPY index.html /usr/share/nginx/html/
+COPY css/ /usr/share/nginx/html/css/
+COPY js/ /usr/share/nginx/html/js/
 
 # Ensure proper permissions
 RUN chmod -R 755 /usr/share/nginx/html && \
@@ -17,8 +20,8 @@ RUN chmod -R 755 /usr/share/nginx/html && \
 # Expose port
 EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+# Health check using curl
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
