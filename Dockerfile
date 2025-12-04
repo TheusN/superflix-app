@@ -10,12 +10,18 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY index.html /usr/share/nginx/html/
 COPY css/ /usr/share/nginx/html/css/
 COPY js/ /usr/share/nginx/html/js/
+COPY icons/ /usr/share/nginx/html/icons/
+COPY manifest.json /usr/share/nginx/html/
+COPY sw.js /usr/share/nginx/html/
 
 # Ensure proper permissions
 RUN chmod -R 755 /usr/share/nginx/html && \
     chmod 644 /usr/share/nginx/html/*.html && \
+    chmod 644 /usr/share/nginx/html/*.json && \
+    chmod 644 /usr/share/nginx/html/sw.js && \
     find /usr/share/nginx/html -type f -name "*.css" -exec chmod 644 {} \; && \
-    find /usr/share/nginx/html -type f -name "*.js" -exec chmod 644 {} \;
+    find /usr/share/nginx/html -type f -name "*.js" -exec chmod 644 {} \; && \
+    find /usr/share/nginx/html -type f -name "*.png" -exec chmod 644 {} \;
 
 # Expose port
 EXPOSE 80

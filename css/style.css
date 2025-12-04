@@ -957,6 +957,72 @@ body {
 }
 
 /* ========================================
+   FOOTER
+   ======================================== */
+
+.footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px 4%;
+    margin-top: 40px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.footer-warning {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.footer-warning svg {
+    flex-shrink: 0;
+    color: #f59e0b;
+}
+
+.footer-credits {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.footer-credits a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.footer-credits a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .footer {
+        padding: 24px 16px;
+        margin-bottom: var(--mobile-nav-height);
+    }
+
+    .footer-warning {
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    .footer-credits {
+        font-size: 0.85rem;
+    }
+}
+
+/* ========================================
    UTILITIES
    ======================================== */
 
