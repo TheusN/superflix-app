@@ -5,7 +5,7 @@
 
 const SuperflixAPI = {
     baseUrl: 'https://superflixapi.run',
-    tmdbApiKey: '9d2bff12ed955c7f1f74b83571f60e6f', // Public TMDB API key
+    tmdbApiKey: '15d2ea6d0dc1d476efbca3eba2b9bbfb', // TMDB API key
     tmdbBaseUrl: 'https://api.themoviedb.org/3',
     tmdbImageUrl: 'https://image.tmdb.org/t/p',
 
