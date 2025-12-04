@@ -19,8 +19,33 @@ class SuperflixApp {
         this.bindElements();
         this.bindEvents();
         this.setupScrollHeader();
+        this.checkUrlCategory();
         await this.loadContent();
         this.hideLoading();
+    }
+
+    /**
+     * Check URL for category parameter
+     */
+    checkUrlCategory() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        if (category && ['movie', 'serie', 'anime'].includes(category)) {
+            this.currentCategory = category;
+            this.updateActiveNav(category);
+        }
+    }
+
+    /**
+     * Update active navigation state
+     */
+    updateActiveNav(category) {
+        this.navLinks.forEach(link => {
+            link.classList.toggle('active', link.dataset.category === category);
+        });
+        this.mobileNavItems.forEach(item => {
+            item.classList.toggle('active', item.dataset.category === category);
+        });
     }
 
     /**
