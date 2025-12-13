@@ -93,7 +93,7 @@ const SuperflixStorage = {
         }
 
         // Add to beginning
-        history.unshift({
+        const historyItem = {
             id: item.id,
             type: item.type,
             title: item.title || item.name,
@@ -101,7 +101,8 @@ const SuperflixStorage = {
             backdrop_path: item.backdrop_path,
             vote_average: item.vote_average,
             watchedAt: Date.now()
-        });
+        };
+        history.unshift(historyItem);
 
         // Trim to max
         if (history.length > this.MAX_HISTORY) {
@@ -109,6 +110,17 @@ const SuperflixStorage = {
         }
 
         localStorage.setItem(this.KEYS.HISTORY, JSON.stringify(history));
+
+        // Sync to server if logged in
+        if (typeof auth !== 'undefined' && auth.isLoggedIn()) {
+            auth.saveToHistory({
+                tmdb_id: item.id,
+                title: item.title || item.name,
+                poster_path: item.poster_path,
+                media_type: item.type === 'movie' ? 'movie' : 'tv'
+            });
+        }
+
         return history;
     },
 
@@ -157,7 +169,7 @@ const SuperflixStorage = {
         }
 
         // Add to beginning with progress
-        continueList.unshift({
+        const continueItem = {
             id: item.id,
             type: item.type,
             title: item.title || item.name,
@@ -168,7 +180,8 @@ const SuperflixStorage = {
             episodeTitle: progress.episodeTitle || null,
             progress: progress.percent || 0,
             updatedAt: Date.now()
-        });
+        };
+        continueList.unshift(continueItem);
 
         // Trim to max
         if (continueList.length > this.MAX_CONTINUE) {
@@ -176,6 +189,20 @@ const SuperflixStorage = {
         }
 
         localStorage.setItem(this.KEYS.CONTINUE, JSON.stringify(continueList));
+
+        // Sync to server if logged in
+        if (typeof auth !== 'undefined' && auth.isLoggedIn()) {
+            auth.saveToHistory({
+                tmdb_id: item.id,
+                title: item.title || item.name,
+                poster_path: item.poster_path,
+                media_type: item.type === 'movie' ? 'movie' : 'tv',
+                season: progress.season,
+                episode: progress.episode,
+                progress: progress.percent || 0
+            });
+        }
+
         return continueList;
     },
 

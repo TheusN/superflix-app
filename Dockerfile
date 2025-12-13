@@ -1,34 +1,24 @@
-FROM nginx:alpine
+FROM node:20-alpine
 
-# Install curl for healthcheck
-RUN apk add --no-cache curl
+# Create app directory
+WORKDIR /app
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy package files
+COPY api/package*.json ./api/
+
+# Install dependencies
+RUN cd api && npm install --production
 
 # Copy app files
-COPY index.html /usr/share/nginx/html/
-COPY calendario.html /usr/share/nginx/html/
-COPY css/ /usr/share/nginx/html/css/
-COPY js/ /usr/share/nginx/html/js/
-COPY icons/ /usr/share/nginx/html/icons/
-COPY manifest.json /usr/share/nginx/html/
-COPY sw.js /usr/share/nginx/html/
-
-# Ensure proper permissions
-RUN chmod -R 755 /usr/share/nginx/html && \
-    chmod 644 /usr/share/nginx/html/*.html && \
-    chmod 644 /usr/share/nginx/html/*.json && \
-    chmod 644 /usr/share/nginx/html/sw.js && \
-    find /usr/share/nginx/html -type f -name "*.css" -exec chmod 644 {} \; && \
-    find /usr/share/nginx/html -type f -name "*.js" -exec chmod 644 {} \; && \
-    find /usr/share/nginx/html -type f -name "*.png" -exec chmod 644 {} \;
+COPY . .
 
 # Expose port
 EXPOSE 80
 
-# Health check using curl
+# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD wget -q --spider http://localhost:80/health || exit 1
 
-CMD ["nginx", "-g", "daemon off;"]
+# Start server
+ENV PORT=80
+CMD ["node", "api/server.js"]
