@@ -113,6 +113,8 @@ class SuperflixApp {
         // Navigation
         this.navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
+                // Permitir navegação normal para links sem data-category (ex: Lançamentos)
+                if (!link.dataset.category) return;
                 e.preventDefault();
                 this.setCategory(link.dataset.category);
             });
@@ -212,6 +214,12 @@ class SuperflixApp {
 
         // Build content rows
         this.contentContainer.innerHTML = '';
+
+        // Add Continue Watching section if available
+        this.addContinueWatchingRow();
+
+        // Add History section if available
+        this.addHistoryRow();
 
         this.addContentRow('Em Alta', trending.results);
         this.addContentRow('Filmes Populares', popularMovies.results, 'movie');
@@ -336,6 +344,98 @@ class SuperflixApp {
         });
 
         this.contentContainer.appendChild(row);
+    }
+
+    /**
+     * Add continue watching row from storage
+     */
+    addContinueWatchingRow() {
+        if (typeof SuperflixStorage === 'undefined') return;
+
+        const continueList = SuperflixStorage.getContinueWatching();
+        if (continueList.length === 0) return;
+
+        const row = document.createElement('section');
+        row.className = 'content-row';
+        row.innerHTML = `
+            <h2 class="section-title">Continuar Assistindo</h2>
+            <div class="content-slider"></div>
+        `;
+
+        const slider = row.querySelector('.content-slider');
+
+        continueList.forEach(item => {
+            const card = this.createContinueCard(item);
+            slider.appendChild(card);
+        });
+
+        this.contentContainer.appendChild(row);
+    }
+
+    /**
+     * Add history row from storage
+     */
+    addHistoryRow() {
+        if (typeof SuperflixStorage === 'undefined') return;
+
+        const history = SuperflixStorage.getHistory();
+        if (history.length === 0) return;
+
+        const row = document.createElement('section');
+        row.className = 'content-row';
+        row.innerHTML = `
+            <h2 class="section-title">Assistidos Recentemente</h2>
+            <div class="content-slider"></div>
+        `;
+
+        const slider = row.querySelector('.content-slider');
+
+        history.slice(0, 20).forEach(item => {
+            const card = this.createContentCard(item, item.type);
+            slider.appendChild(card);
+        });
+
+        this.contentContainer.appendChild(row);
+    }
+
+    /**
+     * Create continue watching card with progress
+     */
+    createContinueCard(item) {
+        const card = document.createElement('div');
+        card.className = 'content-card';
+
+        const title = item.title || item.name;
+        const posterUrl = SuperflixAPI.getPosterUrl(item.poster_path);
+        const progress = item.progress || 0;
+        const episodeInfo = item.season && item.episode ? `T${item.season}:E${item.episode}` : '';
+
+        card.innerHTML = `
+            <img class="card-poster" src="${posterUrl}" alt="${title}" loading="lazy">
+            <div class="card-play">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-title">${title}</div>
+                <div class="card-meta">${episodeInfo || (item.type === 'movie' ? 'Filme' : 'Série')}</div>
+            </div>
+            <div class="card-progress" style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.2);">
+                <div style="width: ${progress}%; height: 100%; background: var(--accent-primary);"></div>
+            </div>
+        `;
+
+        card.addEventListener('click', () => {
+            if (item.season && item.episode) {
+                this.currentItem = { ...item };
+                this.playEpisode(item.season, item.episode);
+            } else {
+                this.showDetails(item, item.type);
+            }
+        });
+
+        return card;
     }
 
     /**
@@ -649,13 +749,26 @@ class SuperflixApp {
      */
     playEpisode(season, episode) {
         const playerUrl = SuperflixAPI.getSeriesPlayerUrl(this.currentItem.id, season, episode);
-        this.openPlayer(playerUrl);
+        this.openPlayer(playerUrl, { season, episode });
     }
 
     /**
      * Open player
      */
-    openPlayer(url) {
+    openPlayer(url, episodeInfo = null) {
+        // Save to history
+        if (typeof SuperflixStorage !== 'undefined' && this.currentItem) {
+            SuperflixStorage.addToHistory(this.currentItem);
+
+            // Save to continue watching with progress info
+            const progressInfo = {
+                season: episodeInfo?.season || null,
+                episode: episodeInfo?.episode || null,
+                percent: 10 // Start at 10%
+            };
+            SuperflixStorage.saveProgress(this.currentItem, progressInfo);
+        }
+
         this.playerContainer.innerHTML = `
             <iframe
                 src="${url}#transparent"
