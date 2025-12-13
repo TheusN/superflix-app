@@ -299,6 +299,10 @@ function showUserMenu() {
     <div class="user-menu-header">
       <strong>${user?.email || 'Usuario'}</strong>
     </div>
+    <button onclick="clearAllCache()" class="user-menu-item">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+      Limpar Cache
+    </button>
     <button onclick="auth.logout()" class="user-menu-item logout-btn">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
       Sair
@@ -317,6 +321,82 @@ function showUserMenu() {
       }
     });
   }, 10);
+}
+
+// Menu de configuracoes
+function toggleSettingsMenu() {
+  const existing = document.getElementById('settings-menu');
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  const menu = document.createElement('div');
+  menu.id = 'settings-menu';
+  menu.className = 'user-menu';
+  menu.innerHTML = `
+    <div class="user-menu-header">
+      <strong>Configuracoes</strong>
+    </div>
+    <button onclick="clearAllCache()" class="user-menu-item">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+      Limpar Cache
+    </button>
+  `;
+
+  const container = document.querySelector('.settings-container');
+  container.appendChild(menu);
+
+  // Fechar ao clicar fora
+  setTimeout(() => {
+    document.addEventListener('click', function closeMenu(e) {
+      const settingsBtn = document.getElementById('settings-btn');
+      if (!menu.contains(e.target) && e.target !== settingsBtn && !settingsBtn.contains(e.target)) {
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 10);
+}
+
+// Limpar todo o cache do navegador
+async function clearAllCache() {
+  const userMenu = document.getElementById('user-menu');
+  const settingsMenu = document.getElementById('settings-menu');
+  if (userMenu) userMenu.remove();
+  if (settingsMenu) settingsMenu.remove();
+
+  if (confirm('Isso vai limpar todo o cache e recarregar a pagina. Deseja continuar?')) {
+    try {
+      // Limpar localStorage (exceto credenciais)
+      const token = localStorage.getItem('superflix_token');
+      const user = localStorage.getItem('superflix_user');
+      localStorage.clear();
+      if (token) localStorage.setItem('superflix_token', token);
+      if (user) localStorage.setItem('superflix_user', user);
+
+      // Limpar sessionStorage
+      sessionStorage.clear();
+
+      // Limpar Service Worker caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+
+      // Desregistrar Service Workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(reg => reg.unregister()));
+      }
+
+      alert('Cache limpo com sucesso! A pagina sera recarregada.');
+      window.location.reload(true);
+    } catch (error) {
+      console.error('Erro ao limpar cache:', error);
+      alert('Erro ao limpar cache. Tente novamente.');
+    }
+  }
 }
 
 // Inicializar UI ao carregar

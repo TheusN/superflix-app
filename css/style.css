@@ -1351,3 +1351,26 @@ body {
 .logout-btn:hover {
     color: #ff4444;
 }
+
+/* Settings Button */
+.settings-container {
+    position: relative;
+}
+
+.settings-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-md);
+}
+
+.settings-btn:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
