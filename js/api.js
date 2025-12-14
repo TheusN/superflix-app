@@ -224,6 +224,49 @@ const SuperflixAPI = {
     },
 
     /**
+     * Get Streamtape custom player URL with all parameters
+     * @param {string} videoId - Streamtape video ID
+     * @param {Object} options - Player options
+     * @returns {string} Custom player URL
+     */
+    getStreamtapePlayerUrl(videoId, options = {}) {
+        const params = new URLSearchParams();
+
+        // Add subtitle if provided
+        if (options.subtitle) {
+            params.append('sub', options.subtitle);
+        }
+
+        // Add subtitle language (default: pt-BR)
+        if (options.lang) {
+            params.append('lang', options.lang);
+        }
+
+        // Add logo (Superflix logo)
+        if (options.logo) {
+            params.append('logo', options.logo);
+        }
+
+        // Add logo link (back to home)
+        if (options.logoLink) {
+            params.append('logo_link', options.logoLink);
+        }
+
+        // Add VAST ad tag if provided
+        if (options.vast) {
+            params.append('vast', options.vast);
+        }
+
+        // Add poster image if provided
+        if (options.image) {
+            params.append('image', options.image);
+        }
+
+        const queryString = params.toString();
+        return `${this.baseUrl}/stape/${videoId}${queryString ? '?' + queryString : ''}`;
+    },
+
+    /**
      * Get player URL for full series
      */
     getSeriesUrl(tmdbId) {

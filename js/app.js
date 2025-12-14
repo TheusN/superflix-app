@@ -8,12 +8,11 @@ class SuperflixApp {
         this.currentItem = null;
         this.isSearching = false;
         this.searchTimeout = null;
-
-        this.init();
     }
 
     /**
      * Initialize the app
+     * DEVE ser chamado SOMENTE após os componentes estarem carregados
      */
     async init() {
         this.bindElements();
@@ -855,18 +854,13 @@ class SuperflixApp {
 }
 
 // Initialize app when DOM is ready AND components are loaded
-function initializeApp() {
+async function initializeApp() {
+    console.log('🚀 Initializing Superflix App after components loaded...');
     window.app = new SuperflixApp();
+    await window.app.init();
+    console.log('✅ Superflix App initialized successfully');
 }
 
-// Se components.js estiver carregado, espera pelos componentes
-if (window.ComponentLoader) {
-    window.addEventListener('componentsLoaded', initializeApp);
-} else {
-    // Se não tiver components.js (página sem componentes), inicializa direto
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-        initializeApp();
-    }
-}
+// SEMPRE espera pelo evento 'componentsLoaded'
+// O components.js dispara esse evento quando termina de carregar
+window.addEventListener('componentsLoaded', initializeApp);

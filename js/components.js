@@ -129,6 +129,7 @@ class ComponentLoader {
         console.log('✅ Components loaded successfully');
 
         // Dispara evento customizado informando que componentes foram carregados
+        console.log('📢 Dispatching componentsLoaded event...');
         window.dispatchEvent(new Event('componentsLoaded'));
     }
 }
