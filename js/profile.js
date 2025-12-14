@@ -12,6 +12,12 @@ class ProfilePage {
     }
 
     init() {
+        // Check if user is logged in - redirect to login if not
+        if (!this.checkAuth()) {
+            window.location.href = '/login.html';
+            return;
+        }
+
         // Initialize storage (theme)
         SuperflixStorage.init();
 
@@ -29,6 +35,14 @@ class ProfilePage {
 
         // Update storage info
         this.updateStorageInfo();
+    }
+
+    /**
+     * Check if user is authenticated
+     */
+    checkAuth() {
+        const token = localStorage.getItem('superflix_token');
+        return !!token; // Returns true if token exists, false otherwise
     }
 
     bindEvents() {

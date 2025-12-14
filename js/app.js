@@ -854,7 +854,19 @@ class SuperflixApp {
     }
 }
 
-// Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize app when DOM is ready AND components are loaded
+function initializeApp() {
     window.app = new SuperflixApp();
-});
+}
+
+// Se components.js estiver carregado, espera pelos componentes
+if (window.ComponentLoader) {
+    window.addEventListener('componentsLoaded', initializeApp);
+} else {
+    // Se não tiver components.js (página sem componentes), inicializa direto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+        initializeApp();
+    }
+}

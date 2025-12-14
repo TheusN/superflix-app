@@ -215,19 +215,45 @@
 
     /**
      * Previne redirecionamentos de página inteira
+     * Nota: Não podemos sobrescrever window.location diretamente por restrições do navegador
+     * Mas podemos interceptar document.location
      */
-    const originalLocationSetter = Object.getOwnPropertyDescriptor(window, 'location').set;
-    Object.defineProperty(window, 'location', {
-        set: function(value) {
-            // Se for URL de anúncio, bloqueia
-            if (isAdUrl(value)) {
-                console.warn('🚫 Redirecionamento bloqueado:', value);
-                return;
-            }
-            originalLocationSetter.call(window, value);
-        },
-        get: function() {
-            return window.location;
+    try {
+        const originalLocationHref = Object.getOwnPropertyDescriptor(Location.prototype, 'href');
+        if (originalLocationHref && originalLocationHref.set) {
+            Object.defineProperty(Location.prototype, 'href', {
+                set: function(value) {
+                    if (isAdUrl(value)) {
+                        console.warn('🚫 Redirecionamento bloqueado:', value);
+                        return;
+                    }
+                    originalLocationHref.set.call(this, value);
+                }
+            });
+        }
+    } catch (e) {
+        // Se não conseguir sobrescrever, não é crítico
+        console.log('⚠️ Não foi possível interceptar location.href (navegador restrito)');
+    }
+
+    /**
+     * Intercepta eventos que podem indicar popups
+     */
+    // Bloqueia beforeunload que alguns popups usam
+    window.addEventListener('beforeunload', function(e) {
+        // Permite apenas se for navegação legítima
+        if (openedPopups.size > 0) {
+            openedPopups.forEach(popup => closePopup(popup));
+        }
+    });
+
+    // Monitora mudanças de visibilidade (tab switching)
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && openedPopups.size > 0) {
+            console.log('⚠️ Detectado popup ao trocar de aba');
+            openedPopups.forEach(popup => closePopup(popup));
+            // Força retorno ao foco após 200ms
+            setTimeout(() => window.focus(), 200);
         }
     });
 

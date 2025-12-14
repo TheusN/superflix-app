@@ -24,7 +24,10 @@
       "Bash(del watch.html)",
       "Bash(ls:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Add content details page, favorites system and user profile\n\n- Add dedicated watch page (/watch/) with full content details\n  - Backdrop image, poster, title, rating, genres, description\n  - Trailer integration from TMDB (YouTube embed)\n  - Favorite button with heart icon toggle\n  - Episode selector for TV series\n  - Similar content recommendations\n\n- Add user profile page (/profile/) with sections:\n  - My Favorites: grid view of all favorited content\n  - History: recently watched titles with clear option\n  - Continue Watching: progress tracking for series\n  - Settings: theme toggle, export/import data, clear cache\n  - Account: login/logout, sync data\n\n- Update navigation to use new content pages\n  - Cards now redirect to /watch/ instead of modal\n  - Profile icon in header and mobile nav\n  - Favorites section on home page\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm start)",
+      "Bash(set PORT=8080)",
+      "Bash(npm install:*)"
     ]
   }
 }

@@ -1,0 +1,56 @@
+<!-- Header Component -->
+<header class="header">
+    <div class="header-left">
+        <a href="/" class="logo">
+            <span class="logo-icon">S</span>
+            <span class="logo-text">Superflix</span>
+        </a>
+        <nav class="nav-menu">
+            <a href="/" class="nav-link" data-page="home" data-category="all">Início</a>
+            <a href="/?category=movie" class="nav-link" data-category="movie">Filmes</a>
+            <a href="/?category=serie" class="nav-link" data-category="serie">Séries</a>
+            <a href="/?category=anime" class="nav-link" data-category="anime">Animes</a>
+            <a href="/tv/" class="nav-link" data-page="tv">TV ao Vivo</a>
+            <a href="/calendario.html" class="nav-link" data-page="calendario">Lançamentos</a>
+            <a href="/profile/" class="nav-link" data-page="profile">Minha Lista</a>
+        </nav>
+    </div>
+    <div class="header-right">
+        <button class="auth-btn" id="auth-btn" title="Entrar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            <span>Entrar</span>
+        </button>
+        <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+            <svg class="icon-sun" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="icon-moon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+        </button>
+        <div class="search-container">
+            <button class="search-toggle" id="searchToggle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </button>
+            <div class="search-box" id="searchBox">
+                <input type="text" id="searchInput" placeholder="Buscar filmes, séries..." autocomplete="off">
+                <button class="search-clear" id="searchClear">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
