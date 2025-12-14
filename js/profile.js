@@ -134,15 +134,13 @@ class ProfilePage {
         });
 
         // Save name
-        document.getElementById('saveNameBtn')?.addEventListener('click', () => {
+        document.getElementById('saveNameBtn')?.addEventListener('click', async () => {
             const newName = document.getElementById('updateName').value.trim();
             if (newName) {
-                // Update user data in localStorage
-                if (typeof auth !== 'undefined') {
-                    const user = auth.getUser();
-                    if (user) {
-                        user.name = newName;
-                        localStorage.setItem('superflix_user', JSON.stringify(user));
+                try {
+                    // Se o usuário estiver logado, salvar no backend
+                    if (typeof auth !== 'undefined' && auth.isLoggedIn()) {
+                        await auth.updateProfile(newName);
 
                         // Update UI
                         document.getElementById('accountName').textContent = newName;
@@ -155,9 +153,27 @@ class ProfilePage {
                         }
 
                         this.showToast('Nome atualizado com sucesso', 'success');
+                    } else {
+                        // Fallback: apenas atualizar localStorage (modo offline)
+                        const user = auth.getUser();
+                        if (user) {
+                            user.name = newName;
+                            localStorage.setItem('superflix_user', JSON.stringify(user));
+
+                            document.getElementById('accountName').textContent = newName;
+                            document.getElementById('profileName').textContent = newName;
+
+                            const authBtnSpan = document.querySelector('#auth-btn span');
+                            if (authBtnSpan && authBtnSpan.textContent.startsWith('Olá,')) {
+                                authBtnSpan.textContent = `Olá, ${newName}`;
+                            }
+
+                            this.showToast('Nome atualizado com sucesso (offline)', 'success');
+                        }
                     }
-                } else {
-                    this.showToast('Erro: sistema de autenticação não disponível', 'error');
+                } catch (error) {
+                    console.error('Erro ao atualizar nome:', error);
+                    this.showToast(error.message || 'Erro ao atualizar nome', 'error');
                 }
             } else {
                 this.showToast('Por favor, digite um nome', 'error');

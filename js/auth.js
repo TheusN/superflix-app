@@ -178,6 +178,45 @@ class Auth {
       console.error('Erro ao salvar no historico:', error);
     }
   }
+
+  async updateProfile(name) {
+    if (!this.isLoggedIn()) {
+      throw new Error('Usuário não está logado');
+    }
+
+    try {
+      const response = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this.getAuthHeaders()
+        },
+        body: JSON.stringify({ name })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao atualizar perfil');
+      }
+
+      // Atualizar token e usuário no localStorage
+      if (data.token) {
+        this.saveCredentials(data.token, data.user);
+      } else {
+        // Se não retornou token, só atualiza o usuário
+        const user = this.getUser();
+        if (user) {
+          user.name = data.user.name;
+          localStorage.setItem(this.userKey, JSON.stringify(user));
+        }
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      throw error;
+    }
+  }
 }
 
 // Instancia global

@@ -137,16 +137,66 @@ router.get('/me', authenticateToken, async (req, res) => {
       if (!user) {
         return res.status(404).json({ error: 'Usuario nao encontrado' });
       }
-      return res.json({ user: { id: user.id, email: user.email, created_at: user.created_at } });
+      return res.json({ user: { id: user.id, email: user.email, name: user.name, created_at: user.created_at } });
     }
 
-    const result = await db.query('SELECT id, email, created_at FROM users WHERE id = $1', [req.user.id]);
+    const result = await db.query('SELECT id, email, name, created_at FROM users WHERE id = $1', [req.user.id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Usuario nao encontrado' });
     }
     res.json({ user: result.rows[0] });
   } catch (error) {
     console.error('Erro ao buscar usuario:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// PUT /api/auth/profile - Atualizar perfil do usuario
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Nome é obrigatório' });
+    }
+
+    const userName = name.trim();
+
+    // Modo offline - usar memoria
+    if (db.isOffline()) {
+      const user = db.memoryStore.users.find(u => u.id === req.user.id);
+      if (!user) {
+        return res.status(404).json({ error: 'Usuario nao encontrado' });
+      }
+      user.name = userName;
+      return res.json({
+        message: 'Nome atualizado com sucesso',
+        user: { id: user.id, email: user.email, name: user.name }
+      });
+    }
+
+    // Modo online - usar PostgreSQL
+    const result = await db.query(
+      'UPDATE users SET name = $1 WHERE id = $2 RETURNING id, email, name, created_at',
+      [userName, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario nao encontrado' });
+    }
+
+    const user = result.rows[0];
+
+    // Gerar novo token com o nome atualizado
+    const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      message: 'Nome atualizado com sucesso',
+      user: { id: user.id, email: user.email, name: user.name },
+      token
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar perfil:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
