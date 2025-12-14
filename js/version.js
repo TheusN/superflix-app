@@ -5,7 +5,7 @@
 
 const AppVersion = {
     // Increment this version whenever you deploy updates
-    CURRENT_VERSION: '1.3.0',
+    CURRENT_VERSION: '1.4.0',
     VERSION_KEY: 'superflix_app_version',
 
     /**
