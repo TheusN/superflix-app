@@ -15,13 +15,39 @@ docker build -t superflix .
 # Rodar localmente com Docker
 docker run -d -p 80:80 superflix
 
-# Modo desenvolvimento (servidor local)
+# Modo desenvolvimento (frontend apenas)
 npx serve .
-# ou
-python -m http.server 8000
+
+# Modo desenvolvimento (com backend/API)
+cd api && npm install && npm start
 ```
 
-A aplicação não tem etapa de build - são arquivos estáticos puros servidos via Nginx.
+## Backend API (api/)
+
+A API Node.js fornece autenticação e persistência de dados.
+
+### Estrutura
+
+- **server.js**: Servidor Express principal
+- **db.js**: Conexão PostgreSQL com pool e inicialização automática
+- **routes/auth.js**: Rotas de autenticação (login, registro, perfil)
+- **routes/history.js**: Rotas de histórico (CRUD, sync, continue watching)
+- **middleware/auth.js**: Middleware JWT para rotas protegidas
+- **migrations/001_init.sql**: Script de criação das tabelas
+
+### Variáveis de Ambiente
+
+```bash
+PORT=80                          # Porta do servidor
+DATABASE_URL=postgres://...      # URL do PostgreSQL
+JWT_SECRET=chave-secreta         # Chave para tokens JWT
+```
+
+### Tabelas do Banco
+
+- **users**: Usuários (id, email, password_hash, created_at)
+- **watch_history**: Histórico de visualização (user_id, tmdb_id, progress, season, episode)
+- **favorites**: Favoritos do usuário (user_id, tmdb_id, title)
 
 ## Arquitetura
 

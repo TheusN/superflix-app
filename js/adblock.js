@@ -81,28 +81,8 @@
     }, true);
 
     // Monitor and block programmatic navigation
-    const originalLocationAssign = window.location.assign;
-    const originalLocationReplace = window.location.replace;
-
-    if (originalLocationAssign) {
-        window.location.assign = function(url) {
-            if (shouldBlock(url)) {
-                console.log('[Superflix AdBlock] Blocked redirect:', url);
-                return;
-            }
-            return originalLocationAssign.call(window.location, url);
-        };
-    }
-
-    if (originalLocationReplace) {
-        window.location.replace = function(url) {
-            if (shouldBlock(url)) {
-                console.log('[Superflix AdBlock] Blocked redirect:', url);
-                return;
-            }
-            return originalLocationReplace.call(window.location, url);
-        };
-    }
+    // Note: window.location.assign and replace are read-only in modern browsers
+    // We use a different approach - intercept beforeunload for logging only
 
     // Intercept setting location.href
     let currentHref = window.location.href;

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+const pool = require('./db');
 const authRoutes = require('./routes/auth');
 const historyRoutes = require('./routes/history');
 
@@ -17,8 +18,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/history', historyRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
-  res.send('OK');
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'OK', database: 'connected' });
+  } catch (error) {
+    res.status(500).json({ status: 'ERROR', database: 'disconnected' });
+  }
 });
 
 // Serve static files
@@ -31,6 +37,21 @@ app.get('*', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Superflix server running on port ${PORT}`);
-});
+// Inicializar banco e iniciar servidor
+async function startServer() {
+  console.log('Iniciando Superflix Server...');
+
+  // Inicializar banco de dados
+  const dbInitialized = await pool.initializeDatabase();
+
+  if (!dbInitialized) {
+    console.warn('AVISO: Banco de dados nao inicializado. Algumas funcionalidades podem nao funcionar.');
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Superflix server rodando na porta ${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+  });
+}
+
+startServer();

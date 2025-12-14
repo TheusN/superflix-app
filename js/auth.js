@@ -1,47 +1,42 @@
 /**
  * Modulo de autenticacao do Superflix
  */
+
+// Classe de autenticacao
 class Auth {
   constructor() {
     this.tokenKey = 'superflix_token';
     this.userKey = 'superflix_user';
   }
 
-  // Verificar se usuario esta logado
   isLoggedIn() {
     return !!this.getToken();
   }
 
-  // Obter token
   getToken() {
     return localStorage.getItem(this.tokenKey);
   }
 
-  // Obter usuario
   getUser() {
     const user = localStorage.getItem(this.userKey);
     return user ? JSON.parse(user) : null;
   }
 
-  // Salvar credenciais
   saveCredentials(token, user) {
     localStorage.setItem(this.tokenKey, token);
     localStorage.setItem(this.userKey, JSON.stringify(user));
   }
 
-  // Limpar credenciais
   clearCredentials() {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
   }
 
-  // Headers para requisicoes autenticadas
   getAuthHeaders() {
     const token = this.getToken();
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
-  // Login
   async login(email, password) {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
@@ -59,7 +54,6 @@ class Auth {
     return data;
   }
 
-  // Cadastro
   async register(email, password) {
     const response = await fetch('/api/auth/register', {
       method: 'POST',
@@ -77,22 +71,18 @@ class Auth {
     return data;
   }
 
-  // Logout
   logout() {
     this.clearCredentials();
     window.location.reload();
   }
 
-  // Sincronizar historico local com o servidor
   async syncLocalHistory() {
     if (!this.isLoggedIn()) return;
 
     try {
-      // Pegar historico do localStorage
       const localHistory = JSON.parse(localStorage.getItem('superflix_history') || '[]');
       const localContinue = JSON.parse(localStorage.getItem('superflix_continue') || '[]');
 
-      // Converter para formato da API
       const items = [...localHistory, ...localContinue].map(item => ({
         tmdb_id: item.id || item.tmdbId,
         imdb_id: item.imdbId,
@@ -107,7 +97,6 @@ class Auth {
 
       if (items.length === 0) return;
 
-      // Enviar para o servidor
       const response = await fetch('/api/history/sync', {
         method: 'POST',
         headers: {
@@ -125,7 +114,6 @@ class Auth {
     }
   }
 
-  // Buscar historico do servidor
   async getServerHistory() {
     if (!this.isLoggedIn()) return [];
 
@@ -144,7 +132,6 @@ class Auth {
     }
   }
 
-  // Salvar item no historico do servidor
   async saveToHistory(item) {
     if (!this.isLoggedIn()) return;
 
@@ -175,114 +162,18 @@ class Auth {
 // Instancia global
 const auth = new Auth();
 
-// UI de Login
+// ===== FUNCOES DE LOGIN =====
+
 function showLoginModal() {
-  // Remover modal existente
-  const existing = document.getElementById('login-modal');
-  if (existing) existing.remove();
-
-  const modal = document.createElement('div');
-  modal.id = 'login-modal';
-  modal.className = 'modal login-modal';
-  modal.innerHTML = `
-    <div class="modal-content login-modal-content">
-      <button class="close-modal" onclick="closeLoginModal()">&times;</button>
-      <h2 id="login-title">Entrar</h2>
-
-      <form id="login-form" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label for="login-email">Email</label>
-          <input type="email" id="login-email" required placeholder="seu@email.com">
-        </div>
-
-        <div class="form-group">
-          <label for="login-password">Senha</label>
-          <input type="password" id="login-password" required minlength="6" placeholder="Minimo 6 caracteres">
-        </div>
-
-        <div id="login-error" class="error-message" style="display: none;"></div>
-
-        <button type="submit" class="btn-primary" id="login-submit">Entrar</button>
-      </form>
-
-      <p class="toggle-form">
-        <span id="toggle-text">Nao tem conta?</span>
-        <a href="#" onclick="toggleLoginForm(event)"><span id="toggle-link">Cadastre-se</span></a>
-      </p>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-  modal.style.display = 'flex';
-  document.getElementById('login-email').focus();
+  // Redirecionar para pagina de login dedicada
+  window.location.href = '/login.html';
 }
 
-function closeLoginModal() {
-  const modal = document.getElementById('login-modal');
-  if (modal) modal.remove();
+function goToRegister() {
+  window.location.href = '/login.html?tab=register';
 }
 
-let isRegisterMode = false;
-
-function toggleLoginForm(e) {
-  e.preventDefault();
-  isRegisterMode = !isRegisterMode;
-
-  document.getElementById('login-title').textContent = isRegisterMode ? 'Cadastrar' : 'Entrar';
-  document.getElementById('login-submit').textContent = isRegisterMode ? 'Cadastrar' : 'Entrar';
-  document.getElementById('toggle-text').textContent = isRegisterMode ? 'Ja tem conta?' : 'Nao tem conta?';
-  document.getElementById('toggle-link').textContent = isRegisterMode ? 'Entrar' : 'Cadastre-se';
-  document.getElementById('login-error').style.display = 'none';
-}
-
-async function handleLogin(e) {
-  e.preventDefault();
-
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  const errorEl = document.getElementById('login-error');
-  const submitBtn = document.getElementById('login-submit');
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Aguarde...';
-  errorEl.style.display = 'none';
-
-  try {
-    if (isRegisterMode) {
-      await auth.register(email, password);
-    } else {
-      await auth.login(email, password);
-    }
-    closeLoginModal();
-    updateAuthUI();
-  } catch (error) {
-    errorEl.textContent = error.message;
-    errorEl.style.display = 'block';
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = isRegisterMode ? 'Cadastrar' : 'Entrar';
-  }
-}
-
-function updateAuthUI() {
-  const authBtn = document.getElementById('auth-btn');
-  if (!authBtn) return;
-
-  if (auth.isLoggedIn()) {
-    const user = auth.getUser();
-    authBtn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      <span class="user-email">${user?.email?.split('@')[0] || 'Perfil'}</span>
-    `;
-    authBtn.onclick = showUserMenu;
-  } else {
-    authBtn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
-      <span>Entrar</span>
-    `;
-    authBtn.onclick = showLoginModal;
-  }
-}
+// ===== MENU DO USUARIO =====
 
 function showUserMenu() {
   const existing = document.getElementById('user-menu');
@@ -299,11 +190,11 @@ function showUserMenu() {
     <div class="user-menu-header">
       <strong>${user?.email || 'Usuario'}</strong>
     </div>
-    <button onclick="clearAllCache()" class="user-menu-item">
+    <button class="user-menu-item" id="menu-clear-cache">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
       Limpar Cache
     </button>
-    <button onclick="auth.logout()" class="user-menu-item logout-btn">
+    <button class="user-menu-item logout-btn" id="menu-logout">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
       Sair
     </button>
@@ -312,18 +203,26 @@ function showUserMenu() {
   const authBtn = document.getElementById('auth-btn');
   authBtn.parentElement.appendChild(menu);
 
+  // Adicionar event listeners
+  document.getElementById('menu-clear-cache').addEventListener('click', clearAllCache);
+  document.getElementById('menu-logout').addEventListener('click', function() {
+    auth.logout();
+  });
+
   // Fechar ao clicar fora
   setTimeout(() => {
-    document.addEventListener('click', function closeMenu(e) {
-      if (!menu.contains(e.target) && e.target !== authBtn) {
+    function closeMenu(e) {
+      if (!menu.contains(e.target) && e.target !== authBtn && !authBtn.contains(e.target)) {
         menu.remove();
         document.removeEventListener('click', closeMenu);
       }
-    });
+    }
+    document.addEventListener('click', closeMenu);
   }, 10);
 }
 
-// Menu de configuracoes
+// ===== MENU DE CONFIGURACOES =====
+
 function toggleSettingsMenu() {
   const existing = document.getElementById('settings-menu');
   if (existing) {
@@ -338,7 +237,7 @@ function toggleSettingsMenu() {
     <div class="user-menu-header">
       <strong>Configuracoes</strong>
     </div>
-    <button onclick="clearAllCache()" class="user-menu-item">
+    <button class="user-menu-item" id="settings-clear-cache">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
       Limpar Cache
     </button>
@@ -347,19 +246,24 @@ function toggleSettingsMenu() {
   const container = document.querySelector('.settings-container');
   container.appendChild(menu);
 
+  // Adicionar event listener
+  document.getElementById('settings-clear-cache').addEventListener('click', clearAllCache);
+
   // Fechar ao clicar fora
   setTimeout(() => {
-    document.addEventListener('click', function closeMenu(e) {
+    function closeMenu(e) {
       const settingsBtn = document.getElementById('settings-btn');
       if (!menu.contains(e.target) && e.target !== settingsBtn && !settingsBtn.contains(e.target)) {
         menu.remove();
         document.removeEventListener('click', closeMenu);
       }
-    });
+    }
+    document.addEventListener('click', closeMenu);
   }, 10);
 }
 
-// Limpar todo o cache do navegador
+// ===== LIMPAR CACHE =====
+
 async function clearAllCache() {
   const userMenu = document.getElementById('user-menu');
   const settingsMenu = document.getElementById('settings-menu');
@@ -368,6 +272,11 @@ async function clearAllCache() {
 
   if (confirm('Isso vai limpar todo o cache e recarregar a pagina. Deseja continuar?')) {
     try {
+      // Limpar cache em memoria da API
+      if (typeof SuperflixAPI !== 'undefined' && SuperflixAPI.cache) {
+        SuperflixAPI.cache.clear();
+      }
+
       // Limpar localStorage (exceto credenciais)
       const token = localStorage.getItem('superflix_token');
       const user = localStorage.getItem('superflix_user');
@@ -399,7 +308,62 @@ async function clearAllCache() {
   }
 }
 
-// Inicializar UI ao carregar
-document.addEventListener('DOMContentLoaded', () => {
+// ===== ATUALIZAR UI DE AUTENTICACAO =====
+
+function updateAuthUI() {
+  const authBtn = document.getElementById('auth-btn');
+  if (!authBtn) return;
+
+  // Remover listeners antigos clonando o botao
+  const newAuthBtn = authBtn.cloneNode(true);
+  authBtn.parentNode.replaceChild(newAuthBtn, authBtn);
+
+  if (auth.isLoggedIn()) {
+    const user = auth.getUser();
+    const userName = user?.name || user?.email?.split('@')[0] || 'Perfil';
+    newAuthBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span class="user-greeting">Ola, ${userName}</span>
+    `;
+    newAuthBtn.addEventListener('click', showUserMenu);
+  } else {
+    newAuthBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+      <span>Entrar</span>
+    `;
+    newAuthBtn.addEventListener('click', showLoginModal);
+  }
+}
+
+// ===== INICIALIZACAO =====
+
+function initAuth() {
+  console.log('Inicializando sistema de autenticacao...');
+
+  // Configurar botao de auth
   updateAuthUI();
-});
+
+  // Configurar botao de configuracoes
+  const settingsBtn = document.getElementById('settings-btn');
+  if (settingsBtn) {
+    // Remover onclick inline
+    settingsBtn.removeAttribute('onclick');
+    settingsBtn.addEventListener('click', toggleSettingsMenu);
+  }
+
+  console.log('Sistema de autenticacao inicializado');
+}
+
+// Inicializar quando DOM estiver pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAuth);
+} else {
+  initAuth();
+}
+
+// Expor para uso global (compatibilidade)
+window.auth = auth;
+window.showLoginModal = showLoginModal;
+window.closeLoginModal = closeLoginModal;
+window.toggleSettingsMenu = toggleSettingsMenu;
+window.clearAllCache = clearAllCache;
