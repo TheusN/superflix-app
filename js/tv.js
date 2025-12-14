@@ -310,15 +310,42 @@ class SuperflixTV {
             this.hls = null;
         }
 
+        // Clean and prepare URL
+        let streamUrl = url.trim();
+
+        // Add required parameters for Pluto TV streams
+        if (streamUrl.includes('pluto.tv')) {
+            // Replace placeholders and add required params
+            streamUrl = streamUrl
+                .replace('{PSID}', '')
+                .replace('advertisingId=&', 'advertisingId=&')
+                .replace('appVersion=unknown', 'appVersion=web');
+
+            // Add essential parameters if missing
+            if (!streamUrl.includes('deviceType')) {
+                streamUrl += (streamUrl.includes('?') ? '&' : '?') + 'deviceType=web';
+            }
+            if (!streamUrl.includes('deviceMake')) {
+                streamUrl += '&deviceMake=Chrome';
+            }
+        }
+
+        // Log stream URL for debugging
+        console.log('Carregando stream:', streamUrl);
+
         // Check if HLS is supported
         if (Hls.isSupported()) {
             this.hls = new Hls({
                 enableWorker: true,
                 lowLatencyMode: true,
-                backBufferLength: 90
+                backBufferLength: 90,
+                xhrSetup: function(xhr, url) {
+                    // Add headers to bypass some CORS issues
+                    xhr.withCredentials = false;
+                }
             });
 
-            this.hls.loadSource(url);
+            this.hls.loadSource(streamUrl);
             this.hls.attachMedia(video);
 
             this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
