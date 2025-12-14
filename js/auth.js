@@ -18,8 +18,15 @@ class Auth {
   }
 
   getUser() {
-    const user = localStorage.getItem(this.userKey);
-    return user ? JSON.parse(user) : null;
+    try {
+      const user = localStorage.getItem(this.userKey);
+      return user ? JSON.parse(user) : null;
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      // Clear corrupted data
+      localStorage.removeItem(this.userKey);
+      return null;
+    }
   }
 
   saveCredentials(token, user) {
@@ -80,8 +87,22 @@ class Auth {
     if (!this.isLoggedIn()) return;
 
     try {
-      const localHistory = JSON.parse(localStorage.getItem('superflix_history') || '[]');
-      const localContinue = JSON.parse(localStorage.getItem('superflix_continue') || '[]');
+      let localHistory = [];
+      let localContinue = [];
+
+      try {
+        localHistory = JSON.parse(localStorage.getItem('superflix_history') || '[]');
+      } catch (e) {
+        console.error('Error parsing history:', e);
+        localStorage.removeItem('superflix_history');
+      }
+
+      try {
+        localContinue = JSON.parse(localStorage.getItem('superflix_continue') || '[]');
+      } catch (e) {
+        console.error('Error parsing continue watching:', e);
+        localStorage.removeItem('superflix_continue');
+      }
 
       const items = [...localHistory, ...localContinue].map(item => ({
         tmdb_id: item.id || item.tmdbId,
