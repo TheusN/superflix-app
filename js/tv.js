@@ -329,22 +329,30 @@ class SuperflixTV {
             });
 
             this.hls.on(Hls.Events.ERROR, (event, data) => {
-                console.error('HLS Error:', data);
                 if (data.fatal) {
+                    console.error('HLS Fatal Error:', data);
+
                     switch (data.type) {
                         case Hls.ErrorTypes.NETWORK_ERROR:
-                            this.showToast('Erro de rede. Tentando reconectar...', 'error');
-                            this.hls.startLoad();
+                            // Canal pode estar bloqueado, offline ou com restrição geográfica
+                            if (data.details === 'manifestLoadError') {
+                                this.showToast('Canal indisponível. Pode estar offline ou bloqueado.', 'error');
+                                console.warn('Canal bloqueado ou offline:', this.currentChannel?.name || 'Desconhecido');
+                            } else {
+                                this.showToast('Erro de conexão. Verifique sua internet.', 'error');
+                            }
                             break;
                         case Hls.ErrorTypes.MEDIA_ERROR:
-                            this.showToast('Erro de mídia. Tentando recuperar...', 'error');
+                            console.warn('Tentando recuperar erro de mídia...');
                             this.hls.recoverMediaError();
                             break;
                         default:
-                            this.showToast('Erro fatal ao reproduzir canal', 'error');
-                            this.hls.destroy();
+                            this.showToast('Canal não pode ser reproduzido', 'error');
                             break;
                     }
+                } else {
+                    // Erros não-fatais apenas logados
+                    console.warn('HLS Warning:', data.details);
                 }
             });
 

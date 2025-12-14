@@ -428,6 +428,5 @@ if (document.readyState === 'loading') {
 // Expor para uso global (compatibilidade)
 window.auth = auth;
 window.showLoginModal = showLoginModal;
-window.closeLoginModal = closeLoginModal;
 window.toggleSettingsMenu = toggleSettingsMenu;
 window.clearAllCache = clearAllCache;
