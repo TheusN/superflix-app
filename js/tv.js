@@ -16,6 +16,8 @@ class SuperflixTV {
             channelsList: document.getElementById('channelsList'),
             categoryFilter: document.getElementById('categoryFilter'),
             channelCount: document.getElementById('channelCount'),
+            channelSearch: document.getElementById('channelSearch'),
+            channelSearchClear: document.getElementById('channelSearchClear'),
             searchInput: document.getElementById('searchInput'),
             searchClear: document.getElementById('searchClear'),
             searchToggle: document.getElementById('searchToggle'),
@@ -48,7 +50,25 @@ class SuperflixTV {
             this.filterChannels();
         });
 
-        // Search
+        // Channel search (in TV page)
+        this.elements.channelSearch?.addEventListener('input', (e) => {
+            const value = e.target.value;
+            this.filterChannels();
+
+            // Show/hide clear button
+            if (this.elements.channelSearchClear) {
+                this.elements.channelSearchClear.style.display = value ? 'flex' : 'none';
+            }
+        });
+
+        this.elements.channelSearchClear?.addEventListener('click', () => {
+            this.elements.channelSearch.value = '';
+            this.elements.channelSearchClear.style.display = 'none';
+            this.filterChannels();
+            this.elements.channelSearch.focus();
+        });
+
+        // Header search (global)
         this.elements.searchInput?.addEventListener('input', (e) => {
             this.searchChannels(e.target.value);
         });
@@ -200,11 +220,13 @@ class SuperflixTV {
 
     filterChannels() {
         const selectedCategory = this.elements.categoryFilter.value;
-        const searchTerm = this.elements.searchInput.value.toLowerCase();
+
+        // Get search term from channel search field (TV page specific)
+        const channelSearchTerm = this.elements.channelSearch?.value.toLowerCase() || '';
 
         this.filteredChannels = this.channels.filter(channel => {
             const matchesCategory = !selectedCategory || channel.category === selectedCategory;
-            const matchesSearch = !searchTerm || channel.name.toLowerCase().includes(searchTerm);
+            const matchesSearch = !channelSearchTerm || channel.name.toLowerCase().includes(channelSearchTerm);
             return matchesCategory && matchesSearch;
         });
 
