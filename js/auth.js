@@ -2,11 +2,17 @@
  * Modulo de autenticacao do Superflix
  */
 
+// Configuracao da API
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3001'
+  : ''; // Em producao, usa o mesmo host (proxy reverso)
+
 // Classe de autenticacao
 class Auth {
   constructor() {
     this.tokenKey = 'superflix_token';
     this.userKey = 'superflix_user';
+    this.apiUrl = API_BASE_URL;
   }
 
   isLoggedIn() {
@@ -45,7 +51,7 @@ class Auth {
   }
 
   async login(email, password) {
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch(`${this.apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -75,7 +81,7 @@ class Auth {
   }
 
   async register(email, password) {
-    const response = await fetch('/api/auth/register', {
+    const response = await fetch(`${this.apiUrl}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -144,7 +150,7 @@ class Auth {
 
       if (items.length === 0) return;
 
-      const response = await fetch('/api/history/sync', {
+      const response = await fetch(`${this.apiUrl}/api/history/sync`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -165,7 +171,7 @@ class Auth {
     if (!this.isLoggedIn()) return [];
 
     try {
-      const response = await fetch('/api/history', {
+      const response = await fetch(`${this.apiUrl}/api/history`, {
         headers: this.getAuthHeaders()
       });
 
@@ -183,7 +189,7 @@ class Auth {
     if (!this.isLoggedIn()) return;
 
     try {
-      await fetch('/api/history', {
+      await fetch(`${this.apiUrl}/api/history`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +217,7 @@ class Auth {
     }
 
     try {
-      const response = await fetch('/api/auth/profile', {
+      const response = await fetch(`${this.apiUrl}/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -444,12 +450,11 @@ function initAuth() {
   console.log('Sistema de autenticacao inicializado');
 }
 
-// Inicializar quando DOM estiver pronto
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initAuth);
-} else {
+// Inicializar quando componentes estiverem carregados
+// O auth.js precisa dos componentes (header com botão de auth)
+window.addEventListener('componentsLoaded', () => {
   initAuth();
-}
+});
 
 // Expor para uso global (compatibilidade)
 window.auth = auth;

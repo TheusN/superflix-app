@@ -1,39 +1,110 @@
 # Superflix
 
-Uma aplicação web estilo Netflix para streaming de filmes, séries e animes, integrada com a SuperflixAPI.
+Uma aplicação web completa estilo Netflix para streaming de filmes, séries e animes, com autenticação de usuários, sistema de favoritos e histórico de visualização.
 
-![Superflix](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Superflix](https://img.shields.io/badge/version-1.8.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13%2B-blue.svg)
 
-## Funcionalidades
+## ✨ Funcionalidades
 
-- **Interface Moderna** - Design inspirado na Netflix com tema escuro
+### Frontend
+- **Interface Moderna** - Design inspirado na Netflix com tema escuro/claro
 - **Catálogo Completo** - Filmes, séries e animes organizados por categorias
 - **Sistema de Busca** - Pesquise por títulos em tempo real
 - **Player Integrado** - Reprodução direta via SuperflixAPI
-- **Responsivo** - Funciona em desktop, tablet e celular
-- **Navegação Intuitiva** - Menu por categorias e navegação mobile
+- **TV ao Vivo** - Canais de TV ao vivo com suporte HLS
+- **Calendário de Lançamentos** - Acompanhe novos episódios
+- **Responsivo** - Funciona perfeitamente em desktop, tablet e celular
+- **PWA Ready** - Instale como app no dispositivo
 
-## Tecnologias
+### Backend (API Node.js + PostgreSQL)
+- **Autenticação JWT** - Sistema seguro de login e registro
+- **Perfil de Usuário** - Salve seu nome e preferências
+- **Favoritos** - Adicione filmes/séries à sua lista
+- **Histórico** - Continue de onde parou
+- **Sincronização** - Dados salvos na nuvem (PostgreSQL)
+- **Modo Offline** - Funciona mesmo sem banco de dados
 
-- HTML5, CSS3, JavaScript (Vanilla)
-- Nginx (servidor web)
-- Docker (containerização)
+## 🛠️ Tecnologias
+
+### Frontend
+- HTML5, CSS3, JavaScript (Vanilla ES6+)
+- Service Worker (PWA)
+- LocalStorage (cache e preferências)
+- Fetch API (requisições)
+
+### Backend
+- Node.js 18+ (runtime)
+- Express.js (servidor HTTP)
+- PostgreSQL 13+ (banco de dados)
+- JWT (autenticação)
+- bcryptjs (hash de senhas)
+
+### Infraestrutura
+- Docker & Docker Compose
+- Nginx (servidor web estático)
+- Easypanel (deploy simplificado)
+
+### APIs Externas
 - TMDB API (metadados de filmes/séries)
-- SuperflixAPI (streaming)
+- SuperflixAPI (streaming de vídeo)
 
-## Estrutura do Projeto
+## 📁 Estrutura do Projeto
 
 ```
-superflix/
-├── index.html          # Página principal
-├── css/
-│   └── style.css       # Estilos da aplicação
-├── js/
-│   ├── api.js          # Integração com APIs
-│   └── app.js          # Lógica da aplicação
-├── nginx.conf          # Configuração do Nginx
-└── Dockerfile          # Build da imagem Docker
+superflix-app/
+├── 📄 Frontend (Static Site)
+│   ├── index.html              # Página principal
+│   ├── login.html              # Página de login/registro
+│   ├── tv/index.html           # TV ao vivo
+│   ├── profile/index.html      # Perfil do usuário
+│   ├── watch/index.html        # Player de vídeo
+│   ├── calendario.html         # Calendário de lançamentos
+│   │
+│   ├── components/             # Componentes reutilizáveis
+│   │   ├── header.html         # Cabeçalho
+│   │   ├── footer.html         # Rodapé
+│   │   └── mobile-nav.html     # Navegação mobile
+│   │
+│   ├── css/                    # Estilos
+│   │   ├── style.css           # Estilos globais
+│   │   ├── tv.css              # Estilos da TV
+│   │   └── profile.css         # Estilos do perfil
+│   │
+│   └── js/                     # Scripts
+│       ├── api.js              # Integração com TMDB API
+│       ├── app.js              # Lógica principal
+│       ├── auth.js             # Autenticação
+│       ├── storage.js          # LocalStorage
+│       ├── components.js       # Loader de componentes
+│       ├── profile.js          # Perfil do usuário
+│       └── tv.js               # TV ao vivo
+│
+├── 🖥️ Backend (Node.js API)
+│   ├── api/
+│   │   ├── server.js           # Servidor Express
+│   │   ├── db.js               # Conexão PostgreSQL
+│   │   ├── package.json        # Dependências Node
+│   │   │
+│   │   ├── routes/             # Rotas da API
+│   │   │   ├── auth.js         # Login/Registro
+│   │   │   └── history.js      # Histórico/Favoritos
+│   │   │
+│   │   ├── middleware/         # Middlewares
+│   │   │   └── auth.js         # JWT Authentication
+│   │   │
+│   │   ├── migrations/         # SQL Migrations
+│   │   │   └── 001_init.sql    # Schema inicial
+│   │   │
+│   │   ├── .env.example        # Template de configuração
+│   │   └── .env                # Configuração (NÃO commitar!)
+│   │
+│   ├── Dockerfile              # Build do frontend
+│   ├── nginx.conf              # Config do Nginx
+│   ├── docker-compose.yml      # Orquestração completa
+│   └── .gitignore              # Arquivos ignorados
 ```
 
 ## Instalação

@@ -88,6 +88,37 @@
     }
 
     /**
+     * Verifica se é navegação interna do site
+     */
+    function isInternalNavigation(url) {
+        if (!url) return false;
+
+        try {
+            const urlString = url.toString().toLowerCase();
+            const currentOrigin = window.location.origin.toLowerCase();
+
+            // Permite URLs relativas
+            if (urlString.startsWith('/') || urlString.startsWith('./') || urlString.startsWith('../')) {
+                return true;
+            }
+
+            // Permite URLs do mesmo domínio
+            if (urlString.startsWith(currentOrigin)) {
+                return true;
+            }
+
+            // Permite localhost e 127.0.0.1
+            if (urlString.includes('localhost') || urlString.includes('127.0.0.1')) {
+                return true;
+            }
+
+            return false;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
      * Override do window.open para interceptar popups
      */
     const originalOpen = window.open;
@@ -97,9 +128,15 @@
 
         console.log('🔍 Tentativa de window.open:', url, target);
 
-        // BLOQUEIA QUALQUER nova aba/janela (_blank, _new, etc)
+        // PERMITE navegação interna do site
+        if (isInternalNavigation(url)) {
+            console.log('✅ Navegação interna permitida:', url);
+            return originalOpen.apply(this, args);
+        }
+
+        // BLOQUEIA QUALQUER nova aba/janela externa (_blank, _new, etc)
         if (target === '_blank' || target === '_new' || !target || target === '') {
-            console.warn('🚫 Nova aba bloqueada:', url);
+            console.warn('🚫 Nova aba externa bloqueada:', url);
 
             // Retorna uma referência fake para não quebrar scripts
             const fakeWindow = {
@@ -116,9 +153,9 @@
         // Se abrir na mesma janela (_self, _parent, _top), permite
         const popup = originalOpen.apply(this, args);
 
-        // Se por algum motivo abriu uma nova janela, fecha imediatamente
+        // Se por algum motivo abriu uma nova janela externa, fecha imediatamente
         if (popup && popup !== window) {
-            console.warn('🚫 Popup detectado, fechando...');
+            console.warn('🚫 Popup externo detectado, fechando...');
             openedPopups.add(popup);
 
             // Fecha imediatamente
@@ -154,12 +191,19 @@
 
         lastClickTime = now;
 
-        // BLOQUEIA TODOS os links que abrem em nova aba (_blank)
+        // BLOQUEIA links externos que abrem em nova aba (_blank)
         const target = e.target.closest('a');
         if (target && target.target === '_blank') {
+            // Permite navegação interna
+            if (isInternalNavigation(target.href)) {
+                console.log('✅ Link interno _blank permitido:', target.href);
+                return;
+            }
+
+            // Bloqueia links externos
             e.preventDefault();
             e.stopPropagation();
-            console.log('🚫 Link _blank bloqueado:', target.href);
+            console.log('🚫 Link externo _blank bloqueado:', target.href);
             return false;
         }
     }, true);
@@ -189,7 +233,9 @@
 
     /**
      * Detecta quando a página perde foco (possível popup)
+     * DESABILITADO: Estava interferindo com navegação legítima
      */
+    /*
     let hadFocus = document.hasFocus();
 
     setInterval(() => {
@@ -207,11 +253,12 @@
                     // Fecha qualquer popup aberto
                     openedPopups.forEach(popup => closePopup(popup));
                 }
-            }, 100); // Reduzido de 500ms para 100ms
+            }, 100);
         }
 
         hadFocus = hasFocus;
-    }, 100); // Reduzido de 200ms para 100ms para detecção mais rápida
+    }, 100);
+    */
 
     /**
      * Previne redirecionamentos de página inteira
