@@ -1,7 +1,30 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx serve . -p 3000)"
+      "Bash(npx serve . -p 3000)",
+      "Bash(ipconfig:*)",
+      "Bash(findstr:*)",
+      "Bash(npx serve:*)",
+      "Bash(docker ps:*)",
+      "Bash(where:*)",
+      "Bash(npm install)",
+      "Bash(node server.js:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(curl:*)",
+      "Bash(npm audit:*)",
+      "Bash(dir:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Add dedicated login page with user name greeting\n\n- Add login.html with tabbed login/register interface\n- Update auth.js to redirect to login page and show \"Ola, nome\"\n- Add name field support in registration and login API\n- Fix adblock.js read-only property error\n- Add database migration for users table with name column\n- Add .gitignore and .env.example\n- Update CLAUDE.md documentation\n- Clean up unused package-lock.json from root\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(find:*)",
+      "Bash(if not exist watch mkdir watch)",
+      "Bash(copy watch.html watchindex.html)",
+      "Bash(del watch.html)",
+      "Bash(ls:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Add content details page, favorites system and user profile\n\n- Add dedicated watch page (/watch/) with full content details\n  - Backdrop image, poster, title, rating, genres, description\n  - Trailer integration from TMDB (YouTube embed)\n  - Favorite button with heart icon toggle\n  - Episode selector for TV series\n  - Similar content recommendations\n\n- Add user profile page (/profile/) with sections:\n  - My Favorites: grid view of all favorited content\n  - History: recently watched titles with clear option\n  - Continue Watching: progress tracking for series\n  - Settings: theme toggle, export/import data, clear cache\n  - Account: login/logout, sync data\n\n- Update navigation to use new content pages\n  - Cards now redirect to /watch/ instead of modal\n  - Profile icon in header and mobile nav\n  - Favorites section on home page\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)"
     ]
   }
 }

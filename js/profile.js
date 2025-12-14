@@ -137,10 +137,30 @@ class ProfilePage {
         document.getElementById('saveNameBtn')?.addEventListener('click', () => {
             const newName = document.getElementById('updateName').value.trim();
             if (newName) {
-                // Save name logic (would need backend support)
-                this.showToast('Nome atualizado com sucesso', 'success');
-                document.getElementById('accountName').textContent = newName;
-                document.getElementById('profileName').textContent = newName;
+                // Update user data in localStorage
+                if (typeof auth !== 'undefined') {
+                    const user = auth.getUser();
+                    if (user) {
+                        user.name = newName;
+                        localStorage.setItem('superflix_user', JSON.stringify(user));
+
+                        // Update UI
+                        document.getElementById('accountName').textContent = newName;
+                        document.getElementById('profileName').textContent = newName;
+
+                        // Update auth button if visible
+                        const authBtnSpan = document.querySelector('#auth-btn span');
+                        if (authBtnSpan && authBtnSpan.textContent.startsWith('Olá,')) {
+                            authBtnSpan.textContent = `Olá, ${newName}`;
+                        }
+
+                        this.showToast('Nome atualizado com sucesso', 'success');
+                    }
+                } else {
+                    this.showToast('Erro: sistema de autenticação não disponível', 'error');
+                }
+            } else {
+                this.showToast('Por favor, digite um nome', 'error');
             }
         });
 
