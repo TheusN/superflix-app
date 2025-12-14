@@ -215,6 +215,9 @@ class SuperflixApp {
         // Build content rows
         this.contentContainer.innerHTML = '';
 
+        // Add Favorites section if available
+        this.addFavoritesRow();
+
         // Add Continue Watching section if available
         this.addContinueWatchingRow();
 
@@ -399,6 +402,32 @@ class SuperflixApp {
     }
 
     /**
+     * Add favorites row from storage
+     */
+    addFavoritesRow() {
+        if (typeof SuperflixStorage === 'undefined') return;
+
+        const favorites = SuperflixStorage.getFavorites();
+        if (favorites.length === 0) return;
+
+        const row = document.createElement('section');
+        row.className = 'content-row';
+        row.innerHTML = `
+            <h2 class="section-title">Meus Favoritos</h2>
+            <div class="content-slider"></div>
+        `;
+
+        const slider = row.querySelector('.content-slider');
+
+        favorites.forEach(item => {
+            const card = this.createContentCard(item, item.type);
+            slider.appendChild(card);
+        });
+
+        this.contentContainer.appendChild(row);
+    }
+
+    /**
      * Create continue watching card with progress
      */
     createContinueCard(item) {
@@ -427,12 +456,7 @@ class SuperflixApp {
         `;
 
         card.addEventListener('click', () => {
-            if (item.season && item.episode) {
-                this.currentItem = { ...item };
-                this.playEpisode(item.season, item.episode);
-            } else {
-                this.showDetails(item, item.type);
-            }
+            this.goToWatchPage(item, item.type);
         });
 
         return card;
@@ -462,9 +486,17 @@ class SuperflixApp {
             </div>
         `;
 
-        card.addEventListener('click', () => this.showDetails(item, type));
+        card.addEventListener('click', () => this.goToWatchPage(item, type));
 
         return card;
+    }
+
+    /**
+     * Navigate to watch page
+     */
+    goToWatchPage(item, type) {
+        const mediaType = type === 'movie' ? 'movie' : 'tv';
+        window.location.href = `/watch/?type=${mediaType}&id=${item.id}`;
     }
 
     /**
@@ -706,7 +738,7 @@ class SuperflixApp {
         if (!this.heroItem) return;
 
         const type = this.heroItem.media_type || (this.heroItem.title ? 'movie' : 'tv');
-        this.showDetails(this.heroItem, type);
+        this.goToWatchPage(this.heroItem, type);
     }
 
     /**

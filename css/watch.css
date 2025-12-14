@@ -1,0 +1,645 @@
+/* ========================================
+   WATCH PAGE - Content Details
+   ======================================== */
+
+.watch-page {
+    min-height: 100vh;
+    padding-bottom: 60px;
+}
+
+/* Backdrop */
+.watch-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70vh;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.watch-backdrop-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center top;
+    transition: opacity 0.5s ease;
+}
+
+.watch-backdrop-gradient {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to top, var(--bg-primary) 0%, transparent 50%),
+        linear-gradient(to right, var(--bg-primary) 0%, transparent 70%),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, transparent 30%);
+}
+
+[data-theme="light"] .watch-backdrop-gradient {
+    background:
+        linear-gradient(to top, var(--bg-primary) 0%, transparent 50%),
+        linear-gradient(to right, rgba(245, 245, 245, 0.95) 0%, transparent 70%),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0%, transparent 30%);
+}
+
+/* Content Area */
+.watch-content {
+    position: relative;
+    display: flex;
+    gap: 40px;
+    padding: calc(var(--header-height) + 80px) 4% 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Poster */
+.watch-poster {
+    flex-shrink: 0;
+    width: 300px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.watch-poster img {
+    width: 100%;
+    height: auto;
+    display: block;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    background: var(--bg-secondary);
+}
+
+/* Info Section */
+.watch-info {
+    flex: 1;
+    padding-top: 20px;
+}
+
+.watch-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="light"] .watch-title {
+    color: var(--text-primary);
+    text-shadow: none;
+}
+
+/* Meta Info */
+.watch-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+}
+
+.meta-rating {
+    color: #46d369;
+    font-weight: 600;
+}
+
+.meta-rating svg {
+    color: #ffd700;
+}
+
+.meta-year {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.meta-duration {
+    color: var(--text-secondary);
+}
+
+.meta-separator {
+    width: 4px;
+    height: 4px;
+    background: var(--text-muted);
+    border-radius: 50%;
+}
+
+/* Genres */
+.watch-genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.genre-tag {
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+[data-theme="light"] .genre-tag {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.genre-tag:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="light"] .genre-tag:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Description */
+.watch-description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    max-width: 800px;
+}
+
+/* Action Buttons */
+.watch-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.btn-watch {
+    background: var(--accent-primary);
+    color: white;
+    padding: 16px 32px;
+    font-size: 1.1rem;
+}
+
+.btn-watch:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+}
+
+.btn-trailer {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 14px 24px;
+}
+
+[data-theme="light"] .btn-trailer {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-trailer:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="light"] .btn-trailer:hover {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.btn-trailer.hidden {
+    display: none;
+}
+
+/* Favorite Button */
+.btn-favorite {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 14px 24px;
+}
+
+[data-theme="light"] .btn-favorite {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-favorite:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="light"] .btn-favorite:hover {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.btn-favorite .icon-heart-filled {
+    display: none;
+    color: #e50914;
+}
+
+.btn-favorite .icon-heart-outline {
+    display: block;
+}
+
+.btn-favorite.favorited {
+    background: rgba(229, 9, 20, 0.15);
+    border-color: rgba(229, 9, 20, 0.4);
+    color: #e50914;
+}
+
+.btn-favorite.favorited .icon-heart-filled {
+    display: block;
+}
+
+.btn-favorite.favorited .icon-heart-outline {
+    display: none;
+}
+
+/* Credits Section */
+.watch-credits {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.credits-section {
+    display: flex;
+    gap: 8px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.credits-label {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.credits-value {
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   EPISODES SECTION
+   ======================================== */
+
+.episodes-section {
+    padding: 40px 4%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.episodes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.episodes-header h2 {
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.episodes-section .season-selector select {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.episodes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.episode-card {
+    display: flex;
+    gap: 20px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+}
+
+.episode-card:hover {
+    background: var(--bg-hover);
+    border-color: rgba(128, 128, 128, 0.2);
+    transform: translateX(4px);
+}
+
+.episode-thumbnail {
+    flex-shrink: 0;
+    width: 200px;
+    aspect-ratio: 16/9;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    background: var(--bg-secondary);
+}
+
+.episode-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.episode-thumbnail .play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all var(--transition-fast);
+}
+
+.episode-card:hover .play-icon {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.play-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--bg-primary);
+    margin-left: 2px;
+}
+
+.episode-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.episode-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.episode-number {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.episode-duration {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.episode-overview {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ========================================
+   RECOMMENDATIONS SECTION
+   ======================================== */
+
+.recommendations-section {
+    padding: 40px 4%;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.recommendations-section .section-title {
+    margin-bottom: 20px;
+}
+
+/* ========================================
+   TRAILER MODAL
+   ======================================== */
+
+.trailer-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-medium);
+}
+
+.trailer-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.trailer-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: background var(--transition-fast);
+}
+
+.trailer-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.trailer-container {
+    width: 90%;
+    max-width: 1200px;
+    aspect-ratio: 16/9;
+}
+
+.trailer-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: var(--radius-md);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1024px) {
+    .watch-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-top: calc(var(--header-height) + 40px);
+    }
+
+    .watch-poster {
+        width: 220px;
+    }
+
+    .watch-info {
+        padding-top: 0;
+    }
+
+    .watch-title {
+        color: var(--text-primary);
+        text-shadow: none;
+    }
+
+    .watch-meta {
+        justify-content: center;
+    }
+
+    .watch-genres {
+        justify-content: center;
+    }
+
+    .watch-description {
+        text-align: center;
+        max-width: 100%;
+    }
+
+    .watch-actions {
+        justify-content: center;
+    }
+
+    .watch-credits {
+        align-items: center;
+    }
+
+    .credits-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 4px;
+    }
+
+    .episode-thumbnail {
+        width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .watch-backdrop {
+        height: 50vh;
+    }
+
+    .watch-content {
+        padding: calc(var(--header-height) + 20px) 16px 20px;
+        gap: 24px;
+    }
+
+    .watch-poster {
+        width: 180px;
+    }
+
+    .watch-title {
+        font-size: 1.8rem;
+    }
+
+    .watch-meta {
+        font-size: 0.9rem;
+        gap: 10px;
+    }
+
+    .watch-description {
+        font-size: 1rem;
+    }
+
+    .watch-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .watch-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .episodes-section {
+        padding: 24px 16px;
+    }
+
+    .episodes-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .episodes-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .episode-card {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .episode-thumbnail {
+        width: 100%;
+    }
+
+    .recommendations-section {
+        padding: 24px 16px;
+    }
+
+    .trailer-container {
+        width: 95%;
+    }
+}
+
+@media (max-width: 480px) {
+    .watch-poster {
+        width: 150px;
+    }
+
+    .watch-title {
+        font-size: 1.5rem;
+    }
+
+    .genre-tag {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+    }
+
+    .btn-watch {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+
+    .btn-trailer,
+    .btn-favorite {
+        padding: 12px 20px;
+    }
+}

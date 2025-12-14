@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carregando... - Superflix</title>
+    <meta name="description" content="Assista filmes, séries e animes online gratuitamente no Superflix">
+    <meta name="theme-color" content="#141414">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Superflix">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/watch.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../icons/icon-512.png">
+    <link rel="apple-touch-icon" href="../icons/icon-192.png">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <span class="logo-icon">S</span>
+                <span class="logo-text">Superflix</span>
+            </a>
+            <nav class="nav-menu">
+                <a href="/" class="nav-link">Início</a>
+                <a href="/?category=movie" class="nav-link">Filmes</a>
+                <a href="/?category=serie" class="nav-link">Séries</a>
+                <a href="/?category=anime" class="nav-link">Animes</a>
+                <a href="/calendario.html" class="nav-link">Lançamentos</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+                <svg class="icon-sun" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="icon-moon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Watch Page Content -->
+    <main class="watch-page">
+        <!-- Hero Backdrop -->
+        <div class="watch-backdrop" id="watchBackdrop">
+            <div class="watch-backdrop-image" id="backdropImage"></div>
+            <div class="watch-backdrop-gradient"></div>
+        </div>
+
+        <!-- Content Details -->
+        <div class="watch-content">
+            <div class="watch-poster">
+                <img id="posterImage" src="" alt="">
+            </div>
+
+            <div class="watch-info">
+                <h1 class="watch-title" id="watchTitle">Carregando...</h1>
+
+                <div class="watch-meta" id="watchMeta">
+                    <!-- Rating, Year, Duration will be inserted here -->
+                </div>
+
+                <div class="watch-genres" id="watchGenres">
+                    <!-- Genres will be inserted here -->
+                </div>
+
+                <p class="watch-description" id="watchDescription"></p>
+
+                <div class="watch-actions">
+                    <button class="btn btn-primary btn-watch" id="btnWatch">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Assistir
+                    </button>
+                    <button class="btn btn-trailer" id="btnTrailer">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                            <line x1="7" y1="2" x2="7" y2="22"></line>
+                            <line x1="17" y1="2" x2="17" y2="22"></line>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <line x1="2" y1="7" x2="7" y2="7"></line>
+                            <line x1="2" y1="17" x2="7" y2="17"></line>
+                            <line x1="17" y1="7" x2="22" y2="7"></line>
+                            <line x1="17" y1="17" x2="22" y2="17"></line>
+                        </svg>
+                        Trailer
+                    </button>
+                    <button class="btn btn-favorite" id="btnFavorite">
+                        <svg class="icon-heart-outline" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <svg class="icon-heart-filled" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <span id="favoriteText">Favoritar</span>
+                    </button>
+                </div>
+
+                <!-- Cast & Crew -->
+                <div class="watch-credits" id="watchCredits">
+                    <div class="credits-section" id="castSection">
+                        <span class="credits-label">Elenco:</span>
+                        <span class="credits-value" id="castList"></span>
+                    </div>
+                    <div class="credits-section" id="directorSection">
+                        <span class="credits-label">Direção:</span>
+                        <span class="credits-value" id="directorList"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Episodes Section (for Series) -->
+        <div class="episodes-section" id="episodesSection" style="display: none;">
+            <div class="episodes-header">
+                <h2>Episódios</h2>
+                <div class="season-selector">
+                    <select id="seasonSelect"></select>
+                </div>
+            </div>
+            <div class="episodes-grid" id="episodesList"></div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations-section" id="recommendationsSection">
+            <h2 class="section-title">Títulos Semelhantes</h2>
+            <div class="content-slider" id="recommendationsList"></div>
+        </div>
+    </main>
+
+    <!-- Trailer Modal -->
+    <div class="trailer-modal" id="trailerModal">
+        <button class="trailer-close" id="trailerClose">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+        </button>
+        <div class="trailer-container" id="trailerContainer"></div>
+    </div>
+
+    <!-- Player Modal -->
+    <div class="player-modal" id="playerModal">
+        <button class="player-close" id="playerClose">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+        </button>
+        <div class="player-container" id="playerContainer"></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay active" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-warning">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                O player de vídeo é fornecido por terceiros e pode exibir anúncios. Recomendamos o uso de bloqueadores de anúncios.
+            </p>
+            <p class="footer-credits">
+                Desenvolvido por <a href="https://github.com/TheusN" target="_blank" rel="noopener">TheusN</a> |
+                Powered by <a href="https://superflixapi.run" target="_blank" rel="noopener">SuperflixAPI</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/watch.js"></script>
+</body>
+</html>
