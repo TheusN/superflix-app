@@ -51,14 +51,27 @@ class Auth {
       body: JSON.stringify({ email, password })
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Erro ao fazer login');
+    // Check content type before parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Servidor não está respondendo corretamente. Verifique se a API está rodando.');
     }
 
-    this.saveCredentials(data.token, data.user);
-    await this.syncLocalHistory();
-    return data;
+    try {
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao fazer login');
+      }
+
+      this.saveCredentials(data.token, data.user);
+      await this.syncLocalHistory();
+      return data;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error('Erro ao processar resposta do servidor');
+      }
+      throw error;
+    }
   }
 
   async register(email, password) {
@@ -68,14 +81,27 @@ class Auth {
       body: JSON.stringify({ email, password })
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'Erro ao cadastrar');
+    // Check content type before parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Servidor não está respondendo corretamente. Verifique se a API está rodando.');
     }
 
-    this.saveCredentials(data.token, data.user);
-    await this.syncLocalHistory();
-    return data;
+    try {
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao cadastrar');
+      }
+
+      this.saveCredentials(data.token, data.user);
+      await this.syncLocalHistory();
+      return data;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error('Erro ao processar resposta do servidor');
+      }
+      throw error;
+    }
   }
 
   logout() {

@@ -73,6 +73,7 @@
             openedPopups.forEach(popup => {
                 if (popup && !popup.closed) {
                     closePopup(popup);
+                    window.focus(); // Garante que o foco volte
                 } else {
                     openedPopups.delete(popup);
                 }
@@ -83,7 +84,7 @@
                 clearInterval(popupCheckInterval);
                 popupCheckInterval = null;
             }
-        }, 500);
+        }, 100); // Reduzido de 500ms para 100ms para fechar mais rápido
     }
 
     /**
@@ -96,9 +97,9 @@
 
         console.log('🔍 Tentativa de window.open:', url, target);
 
-        // Se for um popup (_blank, _new, etc) ou URL de anúncio, bloqueia
-        if (target === '_blank' || target === '_new' || isAdUrl(url)) {
-            console.warn('🚫 Popup bloqueado:', url);
+        // BLOQUEIA QUALQUER nova aba/janela (_blank, _new, etc)
+        if (target === '_blank' || target === '_new' || !target || target === '') {
+            console.warn('🚫 Nova aba bloqueada:', url);
 
             // Retorna uma referência fake para não quebrar scripts
             const fakeWindow = {
@@ -112,30 +113,21 @@
             return fakeWindow;
         }
 
-        // Permite aberturas normais (mesma janela)
+        // Se abrir na mesma janela (_self, _parent, _top), permite
         const popup = originalOpen.apply(this, args);
 
-        // Monitora o popup aberto
+        // Se por algum motivo abriu uma nova janela, fecha imediatamente
         if (popup && popup !== window) {
+            console.warn('🚫 Popup detectado, fechando...');
             openedPopups.add(popup);
-            startPopupMonitor();
 
-            // Tenta fechar após um delay curto (alguns anúncios demoram a carregar)
+            // Fecha imediatamente
             setTimeout(() => {
-                if (popup && !popup.closed) {
-                    // Verifica se a URL é de anúncio
-                    try {
-                        const popupUrl = popup.location.href;
-                        if (isAdUrl(popupUrl)) {
-                            closePopup(popup);
-                        }
-                    } catch (e) {
-                        // Cross-origin, provavelmente é anúncio
-                        console.log('🔒 Popup cross-origin detectado, fechando...');
-                        closePopup(popup);
-                    }
-                }
-            }, 100);
+                closePopup(popup);
+                window.focus(); // Retorna foco para janela principal
+            }, 50);
+
+            startPopupMonitor();
         }
 
         return popup;
@@ -162,16 +154,13 @@
 
         lastClickTime = now;
 
-        // Se o target for um link externo ou suspeito, previne
+        // BLOQUEIA TODOS os links que abrem em nova aba (_blank)
         const target = e.target.closest('a');
         if (target && target.target === '_blank') {
-            const href = target.href;
-            if (isAdUrl(href)) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🚫 Link de anúncio bloqueado:', href);
-                return false;
-            }
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🚫 Link _blank bloqueado:', target.href);
+            return false;
         }
     }, true);
 
@@ -207,22 +196,22 @@
         const hasFocus = document.hasFocus();
 
         if (hadFocus && !hasFocus) {
-            console.log('⚠️ Página perdeu foco, verificando popups...');
+            console.log('⚠️ Página perdeu foco, provavelmente popup abriu!');
 
-            // Após 500ms, tenta recuperar foco
+            // Tenta recuperar foco IMEDIATAMENTE
             setTimeout(() => {
                 if (!document.hasFocus()) {
                     window.focus();
-                    console.log('🔄 Foco retornado à página principal');
+                    console.log('🔄 Foco forçado de volta à página principal');
 
                     // Fecha qualquer popup aberto
                     openedPopups.forEach(popup => closePopup(popup));
                 }
-            }, 500);
+            }, 100); // Reduzido de 500ms para 100ms
         }
 
         hadFocus = hasFocus;
-    }, 200);
+    }, 100); // Reduzido de 200ms para 100ms para detecção mais rápida
 
     /**
      * Previne redirecionamentos de página inteira
