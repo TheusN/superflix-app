@@ -1,6 +1,6 @@
 /**
  * TV ao Vivo - Superflix
- * Estilos para página de TV ao vivo
+ * Estilos para página de TV ao vivo - Layout em Grade
  */
 
 .tv-main {
@@ -14,7 +14,7 @@
     margin: 0 auto;
     padding: 20px;
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: 1fr 450px;
     gap: 20px;
 }
 
@@ -204,6 +204,32 @@
     color: var(--text-primary);
 }
 
+/* Filters Row */
+.tv-filters-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.tv-filter-select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tv-filter-select:hover,
+.tv-filter-select:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+}
+
 .tv-category-filter {
     width: 100%;
     padding: 12px 16px;
@@ -229,12 +255,17 @@
     text-align: center;
 }
 
+/* Channels Grid */
 .tv-channels-list {
     background: var(--bg-secondary);
     border-radius: 12px;
     padding: 12px;
     max-height: calc(100vh - 320px);
     overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    align-content: start;
 }
 
 /* Loading state */
@@ -245,6 +276,7 @@
     justify-content: center;
     padding: 60px 20px;
     color: var(--text-secondary);
+    grid-column: 1 / -1;
 }
 
 .tv-loading .loading-spinner {
@@ -255,23 +287,24 @@
     font-size: 0.95rem;
 }
 
-/* Channel Card */
+/* Channel Card - Grid Style */
 .tv-channel-card {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 12px;
+    padding: 16px 12px;
     background: var(--bg-primary);
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all var(--transition-fast);
     border: 2px solid transparent;
+    text-align: center;
 }
 
 .tv-channel-card:hover {
     background: rgba(255, 255, 255, 0.05);
-    transform: translateX(4px);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .tv-channel-card.active {
@@ -279,46 +312,65 @@
     background: rgba(229, 9, 20, 0.1);
 }
 
+.tv-channel-logo-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 12px;
+}
+
 .tv-channel-logo {
-    width: 50px;
-    height: 50px;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    border-radius: 6px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.05);
-    padding: 6px;
-    flex-shrink: 0;
+    padding: 8px;
+}
+
+.tv-channel-status {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    border: 2px solid var(--bg-primary);
+    animation: pulse 2s infinite;
 }
 
 .tv-channel-info {
-    flex: 1;
+    width: 100%;
     min-width: 0;
 }
 
 .tv-channel-name {
-    font-size: 0.95rem;
-    font-weight: 500;
-    margin-bottom: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 6px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text-primary);
+}
+
+.tv-channel-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tv-channel-country {
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+    font-weight: 500;
 }
 
 .tv-channel-category {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: var(--text-secondary);
     opacity: 0.7;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.tv-channel-status {
-    width: 8px;
-    height: 8px;
-    background: var(--accent-primary);
-    border-radius: 50%;
-    flex-shrink: 0;
-    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
@@ -339,6 +391,7 @@
     padding: 60px 20px;
     color: var(--text-secondary);
     text-align: center;
+    grid-column: 1 / -1;
 }
 
 .tv-empty-state svg {
@@ -377,6 +430,19 @@
 }
 
 /* Responsive Design */
+
+/* Desktop grande - mais colunas na grade */
+@media (min-width: 1600px) {
+    .tv-container {
+        grid-template-columns: 1fr 550px;
+    }
+
+    .tv-channels-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Tablet landscape / Desktop pequeno */
 @media (max-width: 1200px) {
     .tv-container {
         grid-template-columns: 1fr;
@@ -387,14 +453,23 @@
     }
 
     .tv-channels-list {
-        max-height: 500px;
+        max-height: 600px;
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
+/* Tablet portrait */
+@media (max-width: 900px) {
+    .tv-channels-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Mobile landscape / Tablet pequeno */
 @media (max-width: 768px) {
     .tv-main {
         padding-top: 70px;
-        padding-bottom: 70px;
+        padding-bottom: 100px;
     }
 
     .tv-container {
@@ -425,24 +500,44 @@
         border-radius: 8px;
     }
 
+    .tv-filters-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
     .tv-channels-list {
-        padding: 8px;
+        padding: 10px;
         border-radius: 8px;
-        max-height: 400px;
+        max-height: 500px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
     }
 
     .tv-channel-card {
-        padding: 10px;
-        border-radius: 6px;
+        padding: 12px 8px;
+        border-radius: 10px;
     }
 
-    .tv-channel-logo {
-        width: 45px;
-        height: 45px;
+    .tv-channel-logo-wrapper {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 8px;
+    }
+
+    .tv-channel-name {
+        font-size: 0.8rem;
+    }
+
+    .tv-channel-country {
+        font-size: 0.7rem;
+    }
+
+    .tv-channel-category {
+        font-size: 0.65rem;
     }
 }
 
-@media (max-width: 480px) {
+/* Mobile portrait */
+@media (max-width: 540px) {
     .tv-container {
         padding: 8px;
     }
@@ -463,11 +558,66 @@
         font-size: 1rem;
     }
 
+    .tv-filters-row {
+        grid-template-columns: 1fr;
+    }
+
+    .tv-channels-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        max-height: 450px;
+    }
+
+    .tv-channel-card {
+        padding: 10px 6px;
+        border-radius: 8px;
+    }
+
+    .tv-channel-logo-wrapper {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 6px;
+    }
+
+    .tv-channel-logo {
+        border-radius: 8px;
+        padding: 6px;
+    }
+
+    .tv-channel-status {
+        width: 10px;
+        height: 10px;
+        top: 2px;
+        right: 2px;
+    }
+
     .tv-channel-name {
-        font-size: 0.9rem;
+        font-size: 0.75rem;
+        margin-bottom: 4px;
+    }
+
+    .tv-channel-country {
+        font-size: 0.65rem;
     }
 
     .tv-channel-category {
-        font-size: 0.75rem;
+        font-size: 0.6rem;
+    }
+}
+
+/* Mobile muito pequeno */
+@media (max-width: 380px) {
+    .tv-channels-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+
+    .tv-channel-logo-wrapper {
+        width: 45px;
+        height: 45px;
+    }
+
+    .tv-channel-name {
+        font-size: 0.7rem;
     }
 }

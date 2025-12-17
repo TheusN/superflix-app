@@ -5,16 +5,19 @@
 
 class SuperflixTV {
     constructor() {
-        this.m3uUrl = 'https://tv.meuted.io/iptvlegal.m3u';
+        this.m3uUrl = 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8';
         this.channels = [];
         this.filteredChannels = [];
         this.currentChannel = null;
         this.player = null;
         this.hls = null;
+        this.countries = [];
+        this.categories = [];
 
         this.elements = {
             channelsList: document.getElementById('channelsList'),
             categoryFilter: document.getElementById('categoryFilter'),
+            countryFilter: document.getElementById('countryFilter'),
             channelCount: document.getElementById('channelCount'),
             channelSearch: document.getElementById('channelSearch'),
             channelSearchClear: document.getElementById('channelSearchClear'),
@@ -47,6 +50,11 @@ class SuperflixTV {
     setupEventListeners() {
         // Category filter
         this.elements.categoryFilter?.addEventListener('change', () => {
+            this.filterChannels();
+        });
+
+        // Country filter
+        this.elements.countryFilter?.addEventListener('change', () => {
             this.filterChannels();
         });
 
@@ -159,7 +167,7 @@ class SuperflixTV {
                 throw new Error('Nenhum canal encontrado na lista');
             }
 
-            this.populateCategories();
+            this.populateFilters();
             this.filteredChannels = [...this.channels];
             this.renderChannels();
 
@@ -182,15 +190,40 @@ class SuperflixTV {
                 const tvgIdMatch = line.match(/tvg-id="([^"]*)"/);
                 const tvgLogoMatch = line.match(/tvg-logo="([^"]*)"/);
                 const groupTitleMatch = line.match(/group-title="([^"]*)"/);
+                const tvgCountryMatch = line.match(/tvg-country="([^"]*)"/);
+                const tvgNameMatch = line.match(/tvg-name="([^"]*)"/);
 
                 // Channel name is after the last comma
                 const nameMatch = line.split(',').pop().trim();
 
+                // group-title geralmente contém o país nesta playlist
+                const country = groupTitleMatch ? groupTitleMatch[1] : (tvgCountryMatch ? tvgCountryMatch[1] : 'Outros');
+
+                // Tentar extrair categoria do nome ou definir baseado no país
+                let category = 'Geral';
+                const nameLower = (nameMatch || '').toLowerCase();
+                if (nameLower.includes('news') || nameLower.includes('noticias') || nameLower.includes('cnn') || nameLower.includes('notizia')) {
+                    category = 'Notícias';
+                } else if (nameLower.includes('sport') || nameLower.includes('espn') || nameLower.includes('deportes') || nameLower.includes('futebol')) {
+                    category = 'Esportes';
+                } else if (nameLower.includes('music') || nameLower.includes('mtv') || nameLower.includes('musica')) {
+                    category = 'Música';
+                } else if (nameLower.includes('kids') || nameLower.includes('cartoon') || nameLower.includes('nick') || nameLower.includes('disney') || nameLower.includes('infantil')) {
+                    category = 'Infantil';
+                } else if (nameLower.includes('movie') || nameLower.includes('cine') || nameLower.includes('film') || nameLower.includes('hbo') || nameLower.includes('cinema')) {
+                    category = 'Filmes';
+                } else if (nameLower.includes('document') || nameLower.includes('discovery') || nameLower.includes('nat geo') || nameLower.includes('history')) {
+                    category = 'Documentários';
+                } else if (nameLower.includes('religion') || nameLower.includes('church') || nameLower.includes('gospel') || nameLower.includes('católic')) {
+                    category = 'Religioso';
+                }
+
                 currentChannel = {
                     id: tvgIdMatch ? tvgIdMatch[1] : `channel_${channels.length}`,
-                    name: nameMatch || 'Canal sem nome',
+                    name: tvgNameMatch ? tvgNameMatch[1] : (nameMatch || 'Canal sem nome'),
                     logo: tvgLogoMatch ? tvgLogoMatch[1] : '',
-                    category: groupTitleMatch ? groupTitleMatch[1] : 'Outros',
+                    country: country,
+                    category: category,
                     url: ''
                 };
             } else if (line && !line.startsWith('#') && currentChannel) {
@@ -206,28 +239,48 @@ class SuperflixTV {
         return channels;
     }
 
-    populateCategories() {
-        const categories = [...new Set(this.channels.map(ch => ch.category))].sort();
+    populateFilters() {
+        // Popular países
+        const countries = [...new Set(this.channels.map(ch => ch.country))].sort();
+        this.countries = countries;
 
-        this.elements.categoryFilter.innerHTML = '<option value="">Todas as Categorias</option>';
-        categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            this.elements.categoryFilter.appendChild(option);
-        });
+        if (this.elements.countryFilter) {
+            this.elements.countryFilter.innerHTML = '<option value="">Todos os Países</option>';
+            countries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                this.elements.countryFilter.appendChild(option);
+            });
+        }
+
+        // Popular categorias
+        const categories = [...new Set(this.channels.map(ch => ch.category))].sort();
+        this.categories = categories;
+
+        if (this.elements.categoryFilter) {
+            this.elements.categoryFilter.innerHTML = '<option value="">Todas as Categorias</option>';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                this.elements.categoryFilter.appendChild(option);
+            });
+        }
     }
 
     filterChannels() {
-        const selectedCategory = this.elements.categoryFilter.value;
+        const selectedCategory = this.elements.categoryFilter?.value || '';
+        const selectedCountry = this.elements.countryFilter?.value || '';
 
         // Get search term from channel search field (TV page specific)
         const channelSearchTerm = this.elements.channelSearch?.value.toLowerCase() || '';
 
         this.filteredChannels = this.channels.filter(channel => {
             const matchesCategory = !selectedCategory || channel.category === selectedCategory;
+            const matchesCountry = !selectedCountry || channel.country === selectedCountry;
             const matchesSearch = !channelSearchTerm || channel.name.toLowerCase().includes(channelSearchTerm);
-            return matchesCategory && matchesSearch;
+            return matchesCategory && matchesCountry && matchesSearch;
         });
 
         this.renderChannels();
@@ -235,12 +288,14 @@ class SuperflixTV {
 
     searchChannels(term) {
         const searchTerm = term.toLowerCase();
-        const selectedCategory = this.elements.categoryFilter.value;
+        const selectedCategory = this.elements.categoryFilter?.value || '';
+        const selectedCountry = this.elements.countryFilter?.value || '';
 
         this.filteredChannels = this.channels.filter(channel => {
             const matchesCategory = !selectedCategory || channel.category === selectedCategory;
+            const matchesCountry = !selectedCountry || channel.country === selectedCountry;
             const matchesSearch = !searchTerm || channel.name.toLowerCase().includes(searchTerm);
-            return matchesCategory && matchesSearch;
+            return matchesCategory && matchesCountry && matchesSearch;
         });
 
         this.renderChannels();
@@ -283,14 +338,19 @@ class SuperflixTV {
         const isActive = this.currentChannel && this.currentChannel.id === channel.id;
         return `
             <div class="tv-channel-card ${isActive ? 'active' : ''}" data-channel-id="${channel.id}">
-                <img class="tv-channel-logo" src="${channel.logo || '../icons/icon-192.png'}"
-                     alt="${channel.name}"
-                     onerror="this.src='../icons/icon-192.png'">
+                <div class="tv-channel-logo-wrapper">
+                    <img class="tv-channel-logo" src="${channel.logo || '../icons/icon-192.png'}"
+                         alt="${channel.name}"
+                         onerror="this.src='../icons/icon-192.png'">
+                    ${isActive ? '<div class="tv-channel-status"></div>' : ''}
+                </div>
                 <div class="tv-channel-info">
                     <div class="tv-channel-name">${channel.name}</div>
-                    <div class="tv-channel-category">${channel.category}</div>
+                    <div class="tv-channel-meta">
+                        <span class="tv-channel-country">${channel.country}</span>
+                        <span class="tv-channel-category">${channel.category}</span>
+                    </div>
                 </div>
-                ${isActive ? '<div class="tv-channel-status"></div>' : ''}
             </div>
         `;
     }
@@ -306,7 +366,7 @@ class SuperflixTV {
 
             this.elements.currentLogo.src = channel.logo || '../icons/icon-192.png';
             this.elements.currentTitle.textContent = channel.name;
-            this.elements.currentCategory.textContent = channel.category;
+            this.elements.currentCategory.textContent = `${channel.country} • ${channel.category}`;
 
             // Update active state in channel list
             this.renderChannels();
