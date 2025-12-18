@@ -408,6 +408,7 @@ async function clearAllCache() {
 
 function updateAuthUI() {
   const authBtn = document.getElementById('auth-btn');
+  const adminLink = document.getElementById('adminLink');
   if (!authBtn) return;
 
   // Remover listeners antigos clonando o botao
@@ -422,12 +423,38 @@ function updateAuthUI() {
       <span class="user-greeting">Ola, ${userName}</span>
     `;
     newAuthBtn.addEventListener('click', showUserMenu);
+
+    // Verificar se usuario é admin e mostrar link de admin
+    if (adminLink) {
+      checkAdminStatus().then(isAdmin => {
+        adminLink.style.display = isAdmin ? 'flex' : 'none';
+      });
+    }
   } else {
     newAuthBtn.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
       <span>Entrar</span>
     `;
     newAuthBtn.addEventListener('click', showLoginModal);
+
+    // Esconder link de admin
+    if (adminLink) {
+      adminLink.style.display = 'none';
+    }
+  }
+}
+
+// Verificar se usuario tem permissao de admin
+async function checkAdminStatus() {
+  if (!auth.isLoggedIn()) return false;
+
+  try {
+    const response = await fetch(`${auth.apiUrl}/api/admin/dashboard`, {
+      headers: auth.getAuthHeaders()
+    });
+    return response.ok;
+  } catch (error) {
+    return false;
   }
 }
 

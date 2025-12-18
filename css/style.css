@@ -1164,6 +1164,24 @@ body {
    AUTH / LOGIN
    ======================================== */
 
+.admin-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    color: var(--accent-primary);
+    background: rgba(229, 9, 20, 0.1);
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.admin-link:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
 .auth-btn {
     display: flex;
     align-items: center;

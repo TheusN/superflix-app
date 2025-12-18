@@ -5,7 +5,8 @@
 
 class SuperflixTV {
     constructor() {
-        this.m3uUrl = 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8';
+        this.defaultM3uUrl = 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8';
+        this.m3uUrl = this.defaultM3uUrl;
         this.channels = [];
         this.filteredChannels = [];
         this.currentChannel = null;
@@ -13,6 +14,9 @@ class SuperflixTV {
         this.hls = null;
         this.countries = [];
         this.categories = [];
+        this.apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3001'
+            : '';
 
         this.elements = {
             channelsList: document.getElementById('channelsList'),
@@ -44,7 +48,24 @@ class SuperflixTV {
         this.setupEventListeners();
         this.setupTheme();
         this.setupAuth();
+        await this.fetchM3uUrl();
         await this.loadChannels();
+    }
+
+    async fetchM3uUrl() {
+        try {
+            const response = await fetch(`${this.apiUrl}/api/settings/m3u`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.m3u_url) {
+                    this.m3uUrl = data.m3u_url;
+                    console.log('M3U URL carregada do servidor:', this.m3uUrl);
+                }
+            }
+        } catch (error) {
+            console.warn('Usando URL M3U padrão:', error.message);
+            this.m3uUrl = this.defaultM3uUrl;
+        }
     }
 
     setupEventListeners() {
@@ -194,42 +215,53 @@ class SuperflixTV {
                 const tvgNameMatch = line.match(/tvg-name="([^"]*)"/);
 
                 // Channel name is after the last comma
-                const nameMatch = line.split(',').pop().trim();
+                let nameMatch = line.split(',').pop().trim();
 
-                // group-title geralmente contém o país nesta playlist
-                const country = groupTitleMatch ? groupTitleMatch[1] : (tvgCountryMatch ? tvgCountryMatch[1] : 'Outros');
+                // Limpar tags [COLOR ...] do nome
+                nameMatch = nameMatch.replace(/\[COLOR[^\]]*\]/gi, '').replace(/\[\/COLOR\]/gi, '').trim();
 
-                // Tentar extrair categoria do nome ou definir baseado no país
-                let category = 'Geral';
-                const nameLower = (nameMatch || '').toLowerCase();
-                if (nameLower.includes('news') || nameLower.includes('noticias') || nameLower.includes('cnn') || nameLower.includes('notizia')) {
-                    category = 'Notícias';
-                } else if (nameLower.includes('sport') || nameLower.includes('espn') || nameLower.includes('deportes') || nameLower.includes('futebol')) {
-                    category = 'Esportes';
-                } else if (nameLower.includes('music') || nameLower.includes('mtv') || nameLower.includes('musica')) {
-                    category = 'Música';
-                } else if (nameLower.includes('kids') || nameLower.includes('cartoon') || nameLower.includes('nick') || nameLower.includes('disney') || nameLower.includes('infantil')) {
-                    category = 'Infantil';
-                } else if (nameLower.includes('movie') || nameLower.includes('cine') || nameLower.includes('film') || nameLower.includes('hbo') || nameLower.includes('cinema')) {
-                    category = 'Filmes';
-                } else if (nameLower.includes('document') || nameLower.includes('discovery') || nameLower.includes('nat geo') || nameLower.includes('history')) {
-                    category = 'Documentários';
-                } else if (nameLower.includes('religion') || nameLower.includes('church') || nameLower.includes('gospel') || nameLower.includes('católic')) {
-                    category = 'Religioso';
+                // Ignorar linhas que são apenas cabeçalhos/separadores
+                if (this.isHeaderLine(nameMatch)) {
+                    currentChannel = null;
+                    continue;
                 }
+
+                // Ignorar canais marcados como OFF
+                if (nameMatch.toLowerCase().includes('(off)')) {
+                    currentChannel = null;
+                    continue;
+                }
+
+                // Limpar (ON) do nome se existir
+                nameMatch = nameMatch.replace(/\s*\(ON\)\s*/gi, '').trim();
+
+                const channelName = tvgNameMatch ? tvgNameMatch[1] : (nameMatch || 'Canal sem nome');
+
+                // Extrair grupo/categoria do M3U
+                let groupTitle = groupTitleMatch ? groupTitleMatch[1].trim() : '';
+
+                // Normalizar categoria baseado no group-title ou nome do canal
+                let category = this.detectCategory(groupTitle, channelName);
+
+                // Para este M3U brasileiro, group-title é categoria, não país
+                // Detectar país baseado no nome do canal ou usar Brasil como padrão
+                let country = this.detectCountry(channelName, tvgCountryMatch ? tvgCountryMatch[1] : '');
 
                 currentChannel = {
                     id: tvgIdMatch ? tvgIdMatch[1] : `channel_${channels.length}`,
-                    name: tvgNameMatch ? tvgNameMatch[1] : (nameMatch || 'Canal sem nome'),
+                    name: channelName,
                     logo: tvgLogoMatch ? tvgLogoMatch[1] : '',
                     country: country,
                     category: category,
                     url: ''
                 };
             } else if (line && !line.startsWith('#') && currentChannel) {
-                // This is the stream URL
-                currentChannel.url = line;
-                if (currentChannel.url) {
+                // This is the stream URL - validar URL
+                const url = line.trim();
+
+                // Ignorar URLs inválidas
+                if (this.isValidStreamUrl(url)) {
+                    currentChannel.url = url;
                     channels.push(currentChannel);
                 }
                 currentChannel = null;
@@ -237,6 +269,168 @@ class SuperflixTV {
         }
 
         return channels;
+    }
+
+    isHeaderLine(name) {
+        // Detectar linhas que são apenas cabeçalhos/separadores
+        const headerPatterns = [
+            /^\(.*\)$/,  // (CANAIS DE FILMES)
+            /^CANAIS\s+(DE\s+)?/i,  // CANAIS DE FILMES
+            /^TV\s+ABERTA$/i,
+            /^NOTICIAS$/i,
+            /^ESPORTES$/i,
+            /^FILMES$/i,
+            /^SERIES$/i,
+            /^INFANTIL$/i,
+            /^ADULTO$/i,
+            /^RADIOS?\s*(AM|FM)?/i,
+            /^WEB\s*TV$/i,
+            /^TOP\s+MUSICAS$/i,
+            /^\s*$/  // Linha vazia
+        ];
+
+        for (const pattern of headerPatterns) {
+            if (pattern.test(name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    isValidStreamUrl(url) {
+        // Verificar se é uma URL válida de stream
+        if (!url || url.length < 10) return false;
+
+        // Deve começar com http:// ou https://
+        if (!url.startsWith('http://') && !url.startsWith('https://')) return false;
+
+        // Verificar se tem um host válido (não apenas http://)
+        try {
+            const urlObj = new URL(url);
+            if (!urlObj.hostname || urlObj.hostname.length < 3) return false;
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    detectCategory(groupTitle, channelName) {
+        const group = (groupTitle || '').toLowerCase();
+        const name = (channelName || '').toLowerCase();
+
+        // Mapeamento de categorias baseado no group-title
+        const categoryMap = {
+            'tv aberta': 'TV Aberta',
+            'canal aberto': 'TV Aberta',
+            'canais abertos': 'TV Aberta',
+            'abertos': 'TV Aberta',
+            'abertas': 'TV Aberta',
+            'noticias': 'Notícias',
+            'notícias': 'Notícias',
+            'jornalismo': 'Notícias',
+            'abertas-noticias': 'Notícias',
+            'news': 'Notícias',
+            'esportes': 'Esportes',
+            'esporte': 'Esportes',
+            'sports': 'Esportes',
+            'sport': 'Esportes',
+            'filmes': 'Filmes',
+            'filme': 'Filmes',
+            'movies': 'Filmes',
+            'cinema': 'Filmes',
+            'cine': 'Filmes',
+            'series': 'Séries',
+            'série': 'Séries',
+            'infantil': 'Infantil',
+            'kids': 'Infantil',
+            'desenhos': 'Infantil',
+            'documentarios': 'Documentários',
+            'documentário': 'Documentários',
+            'documentary': 'Documentários',
+            'religioso': 'Religioso',
+            'religiosos': 'Religioso',
+            'gospel': 'Religioso',
+            'musica': 'Música',
+            'música': 'Música',
+            'music': 'Música',
+            'variedades': 'Variedades',
+            'entretenimento': 'Entretenimento',
+            'adulto': 'Adulto',
+            'adult': 'Adulto',
+            '+18': 'Adulto',
+            'radio': 'Rádio',
+            'rádio': 'Rádio',
+            'web tv': 'Web TV',
+            'webtv': 'Web TV'
+        };
+
+        // Primeiro tentar pelo group-title
+        for (const [key, value] of Object.entries(categoryMap)) {
+            if (group.includes(key)) {
+                return value;
+            }
+        }
+
+        // Se group-title vazio ou não reconhecido, tentar pelo nome do canal
+        if (name.includes('news') || name.includes('noticias') || name.includes('cnn') || name.includes('jornal')) {
+            return 'Notícias';
+        } else if (name.includes('sport') || name.includes('espn') || name.includes('futebol') || name.includes('combate')) {
+            return 'Esportes';
+        } else if (name.includes('music') || name.includes('mtv') || name.includes('musica')) {
+            return 'Música';
+        } else if (name.includes('kids') || name.includes('cartoon') || name.includes('nick') || name.includes('disney') || name.includes('infantil')) {
+            return 'Infantil';
+        } else if (name.includes('movie') || name.includes('cine') || name.includes('film') || name.includes('hbo') || name.includes('telecine')) {
+            return 'Filmes';
+        } else if (name.includes('document') || name.includes('discovery') || name.includes('nat geo') || name.includes('history')) {
+            return 'Documentários';
+        } else if (name.includes('canção nova') || name.includes('aparecida') || name.includes('rede vida') || name.includes('gospel')) {
+            return 'Religioso';
+        } else if (name.includes('globo') || name.includes('sbt') || name.includes('record') || name.includes('band') || name.includes('redetv')) {
+            return 'TV Aberta';
+        }
+
+        return 'Outros';
+    }
+
+    detectCountry(channelName, tvgCountry) {
+        if (tvgCountry && tvgCountry.trim()) {
+            return tvgCountry.trim();
+        }
+
+        const name = (channelName || '').toLowerCase();
+
+        // Detectar estados/regiões brasileiras no nome
+        const brazilianStates = ['sp', 'rj', 'mg', 'ba', 'rs', 'pr', 'sc', 'pe', 'ce', 'pa', 'ma', 'go', 'pb', 'am', 'es', 'rn', 'al', 'pi', 'mt', 'ms', 'se', 'ro', 'to', 'ac', 'ap', 'rr', 'df'];
+
+        for (const state of brazilianStates) {
+            if (name.includes(` ${state}`) || name.endsWith(` ${state}`) || name.includes(`${state} `)) {
+                return 'Brasil';
+            }
+        }
+
+        // Detectar por nomes de emissoras brasileiras conhecidas
+        const brazilianChannels = ['globo', 'sbt', 'record', 'band', 'redetv', 'cultura', 'tv brasil', 'canção nova', 'aparecida', 'rede vida', 'jovem pan', 'cbn'];
+        for (const channel of brazilianChannels) {
+            if (name.includes(channel)) {
+                return 'Brasil';
+            }
+        }
+
+        // Detectar outros países
+        if (name.includes('portugal') || name.includes('tvi') || name.includes('rtp') || name.includes('sic')) {
+            return 'Portugal';
+        } else if (name.includes('usa') || name.includes('american') || name.includes('cnn') || name.includes('fox news')) {
+            return 'EUA';
+        } else if (name.includes('france') || name.includes('tf1') || name.includes('france 2')) {
+            return 'França';
+        } else if (name.includes('espanha') || name.includes('spain') || name.includes('antena 3')) {
+            return 'Espanha';
+        }
+
+        // Padrão para M3U brasileiro
+        return 'Brasil';
     }
 
     populateFilters() {

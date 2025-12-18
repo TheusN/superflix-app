@@ -49,12 +49,22 @@ async function initializeDatabase() {
     console.log('Conexao com PostgreSQL estabelecida');
 
     const migrationPath = path.join(__dirname, 'migrations', '001_init.sql');
+    const adminMigrationPath = path.join(__dirname, 'migrations', '002_admin.sql');
 
     if (fs.existsSync(migrationPath)) {
       const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
       await client.query(migrationSQL);
       console.log('Tabelas do banco de dados criadas/verificadas com sucesso');
-    } else {
+    }
+
+    // Executar migration de admin
+    if (fs.existsSync(adminMigrationPath)) {
+      const adminMigrationSQL = fs.readFileSync(adminMigrationPath, 'utf8');
+      await client.query(adminMigrationSQL);
+      console.log('Tabelas de admin criadas/verificadas com sucesso');
+    }
+
+    if (!fs.existsSync(migrationPath)) {
       await client.query(`
         CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
